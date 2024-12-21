@@ -5,7 +5,6 @@ export interface IVideo {
 }
 
 export type IGameVideo = Omit<IVideo, 'url'> & {
-  number: number;
   start: number;
   played: boolean;
   selected: boolean;
@@ -43,7 +42,6 @@ export interface IFieldCell {
 }
 
 export interface IPlayer {
-  number: number;
   fields: IFieldCell[][];
   lines: Set<number>[];
 }

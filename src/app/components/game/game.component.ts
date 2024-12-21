@@ -48,7 +48,7 @@ export class GameComponent {
       videos.forEach(video => video.selected = false);
       videos[Math.floor(Math.random() * videos.length)].selected = true;
     }, 250);
-    this.playerService.$video.next(selectedVideo);
+    // this.playerService.$video.next(selectedVideo);
     setTimeout(() => {
       clearInterval(interval);
       videos.forEach(video => video.selected = false);
