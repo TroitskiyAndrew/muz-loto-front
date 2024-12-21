@@ -1,0 +1,9 @@
+<table *ngIf="rows.length" class="field">
+  <tbody>
+    <tr *ngFor="let row of rows">
+      <td *ngFor="let video of row">
+        <div [ngClass]="{'selected': video.selected, 'played': video.played}" class="field__cell"> {{ video.number }}</div>
+      </td>
+    </tr>
+  </tbody>
+</table>

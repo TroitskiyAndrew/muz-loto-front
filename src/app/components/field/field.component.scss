@@ -1,0 +1,37 @@
+.field {
+  border-collapse: collapse;
+  border-spacing: 0;
+  &__cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid black;
+    padding: 10px;
+    margin: 5px;
+    height: 50px;
+    width: 50px;
+  }
+  .selected {
+    background-color: green;
+    transition: background-color 0.5s ease;
+  }
+  .played::before,
+  .played::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px; /* Толщина линии */
+    background-color: #000; /* Цвет линии */
+    transform-origin: center;
+  }
+  .played::before {
+    transform: rotate(45deg); /* Линия по диагонали */
+  }
+
+  .played::after {
+    transform: rotate(-45deg); /* Линия по другой диагонали */
+  }
+}

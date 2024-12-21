@@ -1,0 +1,39 @@
+.icon-button {
+  background-color: inherit;
+  color: $color-contrast;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: 2px;
+  padding: 0;
+  cursor: pointer;
+  i {
+    font-size: 36px;
+  }
+  label {
+    font-size: 14px;
+  }
+  &.active {
+    color: white;
+  }
+}
+
+.button {
+  background-color: $color-contrast;
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  border: none;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  &.disabled {
+    background-color: grey
+  }
+  &.cancel {
+    background-color: rgb(236, 86, 86)
+  }
+}

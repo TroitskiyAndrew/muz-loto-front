@@ -1,0 +1,17 @@
+<div class="game">
+  <div *ngIf="!isGameStarted" class="game__start" (click)="startGame()"> Старт </div>
+  <ng-container *ngFor="let round of stateService.game.rounds; let i = index">
+    <div *ngIf="round.active" class="game__round" (click)="play(i)">
+      <div class="game__round__name"> {{round.name}}</div>
+      <div class="game__round__field">
+        <app-field [round]="round"></app-field>
+        <app-player class="game__round__player"></app-player>
+      </div>
+      <div class="game__round__last-song">
+        <span *ngIf="selectedVideo"> {{ selectedVideo.name }}</span>
+      </div>
+    </div>
+  </ng-container>
+  <div *ngIf="isGameStarted && this.game.rounds[this.currentRound + 1]" class="game__next-round" (click)="nextRound()">Next Round</div>
+</div>
+
