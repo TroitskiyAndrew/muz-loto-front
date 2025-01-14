@@ -1,6 +1,9 @@
 :host {
   height: 100%;
   display: block;
+  &.cards{
+    height: fit-content;
+  }
 }
 .game {
   display: flex;
@@ -11,12 +14,23 @@
   height: 100%;
   padding: 50px;
   margin: auto 0;
-
+  overflow: hidden;
+  &.cards {
+    padding: 0px;
+  }
+  &__logo {
+    margin-bottom: 15px;
+    height: 100px;
+  }
   &__round {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
+    cursor: pointer;
+    .hide-it{
+      opacity: 0;
+    }
     &__last-song {
       height: 50px;
       display: flex;
@@ -32,9 +46,12 @@
       position: absolute;
       z-index: 100;
       top: 0;
-      left: calc(50% - 320px);
+      display: flex;
+      align-items: center;
+      left: 0;
       height: 100%;
       width: 100%;
+      background-color: white;
     }
   }
   &__start {
@@ -47,6 +64,9 @@
     border-radius: 50%;
     font-size: 100px;
     cursor: pointer;
+    img {
+      height: 60%;
+    }
   }
 
   &__next-round {
@@ -54,5 +74,80 @@
     border-radius: 20px;
     padding: 10px;
     cursor: pointer;
+  }
+}
+
+.ticket-head {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 24px;
+  font-weight: 900;
+  &__logo {
+    height: 50px;
+    margin-right: 2px;
+  }
+}
+
+
+.table-bordered {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.table-bordered th,
+.table-bordered td {
+  border: 1px solid #000; /* Границы таблицы черного цвета */
+  padding: 2px 4px;
+  text-align: left;
+  max-width: 20px;
+}
+
+.table-bordered thead {
+  background-color: #f4f4f4; /* Светлый фон для заголовков */
+}
+
+.player-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  div {
+    width: 100%;
+    text-align: center;
+  }
+
+}
+
+
+.player-section {
+  // page-break-after: always;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  row-gap: 50px;
+  border-bottom: 1px solid;
+  border-top: 1px solid;
+  padding: 20px 0px;
+  &__round {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 10px;
+
+
+  }
+}
+
+/* Убедитесь, что разрыв страницы работает только для печати */
+@media print {
+  .player-section:nth-of-type(3n) {
+    page-break-after: always;
   }
 }

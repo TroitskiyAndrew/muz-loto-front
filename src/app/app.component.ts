@@ -1,4 +1,5 @@
 import {  Component } from '@angular/core';
+import { StateService } from './services/state.service';
 
 @Component({
   selector: 'app-root',
@@ -7,5 +8,9 @@ import {  Component } from '@angular/core';
 })
 export class AppComponent {
 
-  constructor () {}
+  constructor (public stateService: StateService) {}
+
+  nextRound(){
+    this.stateService.$nextRound.next(undefined);
+  }
 }

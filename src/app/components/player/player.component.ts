@@ -3,6 +3,7 @@ import { PlayerService } from '../../services/player.service';
 import { IGameVideo, IVideo } from '../../models/models';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { StateService } from '../../services/state.service';
 
 @Component({
   selector: 'app-player',
@@ -12,10 +13,15 @@ import { environment } from '../../../environments/environment';
 export class PlayerComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('playerContainer', { static: true }) playerContainer!: ElementRef;
+  @ViewChild('backgroundMusic', { static: true }) backgroundMusic!: ElementRef;
   private player: any;
+  private backgroundPlayer: any;
   sub!: Subscription;
+  iframe: any;
+  isPlaying = false;
+  switching = false;
 
-  constructor(private el: ElementRef, private renderer: Renderer2, private playerService: PlayerService) {}
+  constructor(private el: ElementRef, private renderer: Renderer2, private playerService: PlayerService, private stateService: StateService) {}
 
   ngAfterViewInit() {
     // Проверяем, если API уже загружен
@@ -44,7 +50,7 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
         modestbranding: 1,
         rel: 0,
         showinfo: 0,
-        fs: 0,
+        fs: 1,
         cc_load_policy: 0,
         iv_load_policy: 3,
       },
@@ -52,57 +58,101 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
         onReady: () => {
           this.player.setVolume(0);
           this.playerService.$init.next(true);
+          const iframe = document.querySelector('app-player > iframe') as HTMLIFrameElement;
+          iframe.style.width = `170%`;
+          iframe.style.height = `220%`;
           this.sub = this.playerService.$video.subscribe((video) => {
             this.play(video);
-          })
+          });
+          this.sub = this.playerService.$stop.subscribe(() => {
+            this.stop();
+          });
+        },
+      }
+    });
+    this.backgroundPlayer = new (window as any).YT.Player(this.backgroundMusic.nativeElement, {
+      videoId: 'PJxxfilLnGI',
+      playerVars: {
+        controls: 0,
+        modestbranding: 1,
+        rel: 0,
+        showinfo: 0,
+        fs: 1,
+        cc_load_policy: 0,
+        iv_load_policy: 3,
+      },
+      events: {
+        onReady: () => {
+          this.backgroundPlayer.setVolume(0);
+          this.backgroundPlayer.seekTo(930, true);
+          // const iframe = document.querySelector('.background-player > iframe') as HTMLIFrameElement;
+          this.increaseVolume(false, false);
+          this.backgroundPlayer.playVideo();
+        },
+        onStateChange: (event: any) => {
+          if (event.data === 0){
+            this.backgroundPlayer.seekTo(930, true);
+          }
         },
       }
     });
 
-
   }
 
   private play(video: IGameVideo) {
-    const {id , start, duration}  = video;
+    const {id , start}  = video;
     this.player.loadVideoById(id);
     this.player.playVideo();
-    const endTime = environment.playerDelay + duration;
     setTimeout(() => {
       this.player.seekTo(start, true);
-      this.increaseVolume();
+
+      this.increaseVolume(true, true);
       this.increaseVisibility();
     }, environment.playerDelay * 1000);
+  }
 
-    setTimeout(() => {
-      this.decreaseVolume();
-      this.decreaseVisibility();
-    }, endTime * 1000 - ((100/environment.videoStep) * environment.videoStepDuration ));
-
+  stop(){
+    this.decreaseVolume(true, true);
+    this.decreaseVisibility();
     setTimeout(() => {
       this.renderer.setStyle(this.el.nativeElement, 'opacity', '0');
       this.player.stopVideo();
-    }, endTime * 1000)
+    }, (100/environment.videoStep) * environment.videoStepDuration)
   }
 
-  increaseVolume() {
+  increaseVolume(main: boolean, switching: boolean) {
+    if(!main){
+      this.backgroundPlayer.playVideo()
+    }
+    if(switching){
+      this.decreaseVolume(!main, false);
+    }
+    const player = main ? this.player : this.backgroundPlayer;
     let currentVolume = 0;
     const interval = setInterval(() => {
-      if (currentVolume < 100) {
+      if (currentVolume < (main ? 100 : environment.backgroundVolume)) {
         currentVolume += environment.videoStep;
-        this.player.setVolume(currentVolume);
+        player.setVolume(currentVolume);
       } else {
         clearInterval(interval);
       }
     }, environment.videoStepDuration);
   }
 
-  decreaseVolume() {
-    let currentVolume = 100;
+  decreaseVolume(main: boolean, switching: boolean) {
+    if(switching){
+      this.increaseVolume(!main, false);
+    }
+    const player = main ? this.player : this.backgroundPlayer;
+    let currentVolume = player.getVolume();
     const interval = setInterval(() => {
       if (currentVolume > 0) {
         currentVolume -= environment.videoStep;
-        this.player.setVolume(currentVolume);
+        player.setVolume(currentVolume);
       } else {
+        if(!main){
+          this.backgroundPlayer.pauseVideo();
+        }
         clearInterval(interval);
       }
     }, environment.videoStepDuration);

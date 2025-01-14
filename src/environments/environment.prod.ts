@@ -4,4 +4,5 @@ export const environment = {
   videoStep: 5,
   videoStepDuration: 100,
   cardsCount: 100,
+  backgroundVolume: 30,
 };

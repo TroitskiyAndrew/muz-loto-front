@@ -16,8 +16,8 @@ export class FieldComponent implements AfterViewInit{
   }
 
   ngAfterViewInit(): void {
-    for (let i = 0; i < [...this.round.videos].length; i += this.round.roundFieldRows) {
-      this.rows.push([...this.round.videos].slice(i, i + this.round.roundFieldRows));
+    for (let i = 0; i < this.round.roundFieldRows; i ++) {
+      this.rows.push([...this.round.videos].slice(i * this.round.roundFieldColumns, (i * this.round.roundFieldColumns) + this.round.roundFieldColumns));
     }
     this.rows = [...this.rows];
     this.cdr.detectChanges();

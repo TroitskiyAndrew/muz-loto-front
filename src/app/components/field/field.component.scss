@@ -11,10 +11,14 @@
     margin: 5px;
     height: 50px;
     width: 50px;
-  }
-  .selected {
-    background-color: green;
     transition: background-color 0.5s ease;
+  }
+  .blue {
+    background-color: #6799FF;
+  }
+  .green {
+    background-color: #70A63F;
+
   }
   .played::before,
   .played::after {

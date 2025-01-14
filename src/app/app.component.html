@@ -1,1 +1,2 @@
-<app-game></app-game>
+<app-game [ngClass]="{'cards': stateService.showCards}"></app-game>
+<img (click)="nextRound()" *ngIf="!stateService.showCards" [src]="'assets/' + stateService.logo + '.png'" alt="">
