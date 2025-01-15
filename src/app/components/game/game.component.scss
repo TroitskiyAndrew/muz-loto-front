@@ -115,6 +115,7 @@
   align-items: center;
   justify-content: center;
   height: 42px;
+  font-size: 14px;
   div {
     width: 100%;
     text-align: center;
@@ -133,7 +134,7 @@
   row-gap: 50px;
   border-bottom: 1px solid;
   border-top: 1px solid;
-  padding: 20px 0px;
+  padding: 20px 5px;
   &__round {
     width: 100%;
     display: flex;
