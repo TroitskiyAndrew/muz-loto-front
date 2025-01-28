@@ -4,7 +4,7 @@
       <img src="assets/logo.png" alt="">
      </div>
     <ng-container *ngFor="let round of stateService.game.rounds; let i = index">
-      <div *ngIf="round.active"  class="game__round" (click)="play(i, $event)">
+      <div *ngIf="round.active"  class="game__round" (click)="play(i, $event)" (contextmenu)="rightClick($event)">
         <div class="game__round__name"> {{round.name}}</div>
         <!-- <img src="assets/Финал.png" alt="" class="game__logo"> -->
         <div class="game__round__field">
@@ -12,7 +12,7 @@
           <app-player class="game__round__player"></app-player>
         </div>
         <div class="game__round__last-song">
-          <span *ngIf="showName"> {{ selectedVideo?.name }}</span>
+          <span *ngIf="showName"> {{ selectedVideo?.name?.split(';')?.join(' - ') }}</span>
         </div>
       </div>
     </ng-container>

@@ -35,7 +35,7 @@ export class GameComponent {
       winners: [] as number[]
     },
   }
-  simulation = true;
+  simulation = false;
   simulationAttempt = 0;
   roundIndex = 0;
 
@@ -248,6 +248,11 @@ export class GameComponent {
 
 
 
+  }
+
+  rightClick(event: Event){
+    event.stopImmediatePropagation();
+    event.preventDefault();
   }
 
   private selectVideo(round: IGameRound) {
