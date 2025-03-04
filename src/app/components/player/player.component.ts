@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { PlayerService } from '../../services/player.service';
 import { ISong } from '../../models/models';
 import { Subscription } from 'rxjs';
@@ -20,8 +20,18 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
   iframe: any;
   isPlaying = false;
   switching = false;
+  block = false;
 
   constructor(private el: ElementRef, private renderer: Renderer2, private playerService: PlayerService, private stateService: StateService) {}
+
+  @HostListener('click', ['$event'])
+  onClick(event: MouseEvent) {
+    event.stopImmediatePropagation();
+    if(this.block){
+      return;
+    }
+    this.playerService.stop();
+  }
 
   ngAfterViewInit() {
     // Проверяем, если API уже загружен
@@ -58,9 +68,9 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
         onReady: () => {
           this.player.setVolume(0);
           this.playerService.$init.next(true);
-          const iframe = document.querySelector('app-player > iframe') as HTMLIFrameElement;
-          iframe.style.width = `170%`;
-          iframe.style.height = `220%`;
+          const iframe = document.querySelector('app-player > .player-wrapper > iframe') as HTMLIFrameElement;
+          iframe.style.width = `100%`;
+          iframe.style.height = `100%`;
           this.sub = this.playerService.$video.subscribe((video) => {
             this.play(video);
           });
@@ -100,9 +110,14 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
   }
 
   private play(video: ISong) {
+    this.block = true;
+    (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex = '100';
     const {id , start}  = video;
     this.player.loadVideoById(id);
     this.player.playVideo();
+    setTimeout(() => {
+      this.block = false;
+    }, environment.playerDelay * 1000 + 2000);
     setTimeout(() => {
       this.player.seekTo(start, true);
 
@@ -112,6 +127,7 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
   }
 
   stop(){
+    (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex = '-100';
     this.decreaseVolume(true, true);
     this.decreaseVisibility();
     setTimeout(() => {

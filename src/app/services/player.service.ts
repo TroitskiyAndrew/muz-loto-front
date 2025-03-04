@@ -14,5 +14,28 @@ export class PlayerService {
 
   constructor() { }
 
+  play(song: ISong){
+    this.$video.next(song);
+    return new Promise<void>((resolve) => {
+      const sub = this.$stop.subscribe(() => {
+        sub.unsubscribe();
+        resolve();
+      })
+    })
+  }
+
+  simulatePlay(){
+    return new Promise<void>((resolve) => {
+      const sub = this.$stop.subscribe(() => {
+        sub.unsubscribe();
+        resolve();
+      })
+    })
+  }
+
+  stop(){
+    this.$stop.next(undefined)
+  }
+
 
 }

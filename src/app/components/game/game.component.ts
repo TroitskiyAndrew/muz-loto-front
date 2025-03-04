@@ -31,8 +31,6 @@ const WIN_NAMING = {
 })
 export class GameComponent {
   public isGameStarted = false;
-  public isPlaying = false;
-  public block = false;
   public showName = false;
   wantedWinner: Winner | null = Winner.Line;
   time = 0;
@@ -60,27 +58,13 @@ export class GameComponent {
     private creatorService: CreatorService,
     private modalService: ModalService,
   ) {
-    this.simulateGames(50);
+    // this.simulateGames(50);
   }
 
   startGame() {
     this.isGameStarted = true;
     this.new_game = this.creatorService.generateGame();
     this.new_tickets = this.creatorService.generateTickets(this.new_game);
-    // this.new_game = JSON.parse(localStorage.getItem('new_game')!);
-    // this.new_game.rounds.forEach(round => round.field.flat().forEach(song => {
-    //   song.played = false;
-    //   song.class = '';
-    //   if(song.id === 'l2aQWEIipDs'){
-    //     song.id = 'UZ9ac7vb8-E'
-    //   }
-    // }))
-    // this.new_tickets = JSON.parse(localStorage.getItem('new_tickets')!);
-    // this.new_tickets.forEach(ticket => ticket.rounds.forEach(round => round.field.flat().forEach(song => {
-    //   if(song.id === 'l2aQWEIipDs'){
-    //     song.id = 'UZ9ac7vb8-E'
-    //   }
-    // })))
     this.playNewGame();
     // this.simulateGames(10)
   }
@@ -137,6 +121,7 @@ export class GameComponent {
   }
 
   prepareRound() {
+    this.showName = false;
     this.playedSongs = [];
     this.currentStep = 0;
     this.wantedWinner = Winner.Line;
@@ -172,31 +157,29 @@ export class GameComponent {
 
   handleClick(event: Event){
     event?.stopImmediatePropagation();
-    if (!this.playerService.$init.value || this.block) {
+    if (!this.playerService.$init.value) {
       return;
     }
     if (this.playedSongs.length === this.roundSongs.length){
       this.roundIndex++;
       this.prepareRound();
     }
-    this.isPlaying ? this.handleStop() : this.handleStart();
+    this.handleStart();
   }
 
   handleStop(){
-    this.isPlaying = false;
     this.showName = true;
-    this.new_simulation ? 0 : this.playerService.$stop.next(undefined);
+    this.new_selectedSong!.played = true;
     if (this.new_winners.size ) {
       this.askWinner(this.new_winners);
     }
   }
 
   handleStart() {
-    this.isPlaying = true;
+    this.showName = false;
     this.currentStep++;
     this.deep = DEEP + Math.floor(this.currentStep / 10);
     this.new_selectedSong = null;
-    this.block = true;
     const availableSongs = this.roundSongs.filter(song => !this.playedSongs.includes(song.id)).sort(() => Math.random() - 0.5);
     let randomizerIndex = 0;
     const randomizerInterval = setInterval(() => {
@@ -206,25 +189,16 @@ export class GameComponent {
 
     const selectedSongId = this.selectSong();
     this.new_selectedSong = this.roundSongs.find(song => song.id === selectedSongId)!;
-    this.new_simulation ? 0 : this.playerService.$video.next(this.new_selectedSong);
+    const playPromise = this.new_simulation ? Promise.resolve() : this.playerService.play(this.new_selectedSong);
+    playPromise.then(this.handleStop.bind(this));
 
     setTimeout(() => {
       clearInterval(randomizerInterval);
       this.roundSongs.forEach((song) => (song.class = ''));
       this.new_selectedSong!.class = 'green';
     }, this.new_simulation ? 0 : environment.playerDelay * 1000 - 500);
-    setTimeout(() => {
-      this.new_selectedSong!.played = true;
-      this.block = false;
-    }, this.new_simulation ? 0 : environment.playerDelay * 1000 + 2000);
     this.new_winners = this.getWinners(selectedSongId);
     this.playedSongs.push(selectedSongId);
-    if(this.new_simulation){
-      this.new_simulation = this.currentStep < 40;
-      setTimeout(() => {
-        this.handleClick(new Event('test'));
-      }, 10)
-    }
   }
 
 
