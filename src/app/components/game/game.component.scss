@@ -134,7 +134,8 @@
   row-gap: 50px;
   border-bottom: 1px solid;
   border-top: 1px solid;
-  padding: 20px 5px;
+  padding: 15px 5px;
+  height: 340px;
   &__round {
     width: 100%;
     display: flex;
@@ -150,5 +151,44 @@
 @media print {
   .player-section:nth-of-type(3n) {
     page-break-after: always;
+  }
+}
+
+.dialog{
+  &__overlay{
+    position: absolute;
+    z-index: 1000;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    background-color: #80808096;
+  }
+
+  &__window {
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+  }
+
+  &__buttons {
+    display: flex;
+    justify-content: space-around;
+    &__item {
+      padding: 10px 40px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .accept {
+      background-color: green;
+    }
+    .reject {
+      background-color: red;
+    }
   }
 }

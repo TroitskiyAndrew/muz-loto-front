@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { PlayerService } from '../../services/player.service';
-import { IGameVideo, IVideo } from '../../models/models';
+import { ISong } from '../../models/models';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { StateService } from '../../services/state.service';
@@ -99,7 +99,7 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
 
   }
 
-  private play(video: IGameVideo) {
+  private play(video: ISong) {
     const {id , start}  = video;
     this.player.loadVideoById(id);
     this.player.playVideo();

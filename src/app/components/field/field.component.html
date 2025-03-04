@@ -1,8 +1,8 @@
-<table *ngIf="rows.length" class="field">
+<table *ngIf="round" class="field">
   <tbody>
-    <tr *ngFor="let row of rows; let i = index">
-      <td *ngFor="let video of row; let i2 = index">
-        <div [ngClass]="[video.class, 'field__cell', video.played ? 'played' : '']"> {{ video.number}}</div>
+    <tr *ngFor="let row of round.field; let i = index">
+      <td *ngFor="let song of row; let i2 = index">
+        <div [ngClass]="[song.class, 'field__cell', song.played ? 'played' : '']"> {{ song.number + 1}}</div>
       </td>
     </tr>
   </tbody>

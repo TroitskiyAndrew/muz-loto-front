@@ -1,2 +1,3 @@
 <app-game [ngClass]="{'cards': stateService.showCards}"></app-game>
-<img (click)="nextRound()" *ngIf="!stateService.showCards" [src]="'assets/' + stateService.logo + '.png'" alt="">
+<img *ngIf="!stateService.showCards" [src]="'assets/' + stateService.logo + '.png'" alt="">
+<app-modal *ngIf="modalService.showModal"></app-modal>

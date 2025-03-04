@@ -1,0 +1,9 @@
+<div class="dialog">
+  <div class="dialog__message">
+    {{ modalService.message }}
+  </div>
+  <div class="dialog__buttons">
+    <div class="dialog__buttons__item accept" (click)="modalService.submitAnswer(true)"> Да </div>
+    <div class="dialog__buttons__item reject" (click)="modalService.submitAnswer(false)"> Нет </div>
+  </div>
+</div>

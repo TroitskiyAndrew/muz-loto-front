@@ -1,73 +1,102 @@
-export interface IVideo {
-  url: string;
-  name: string;
-  priority: boolean;
+export interface IGameSettings {
+  doubleWin: boolean;
+  logo: string;
+  rounds: IRoundSettings[];
 }
 
-export type IGameVideo = Omit<IVideo, 'url'> & {
-  number: number;
-  start: number;
-  played: boolean;
-  class: string;
-  id: string;
-  priority: boolean
-}
-
-export interface IRound {
-  name: string;
-  roundFieldColumns: number,
-  roundFieldRows: number,
-  playerFieldColumns: number,
-  playerFieldRows: number,
-  players: IPlayer[];
-  videos: IVideo[];
-  fields: IFieldCell[][];
+export interface IRoundSettings {
+  roundFieldColumns: number;
+  roundFieldRows: number;
+  playerFieldColumns: number;
+  playerFieldRows: number;
   lineWinners: number;
   crossWinners: number;
   allWinners: number;
-  doubleWin: boolean,
-}
-
-export type IGameRound = Omit<IRound, 'videos'> & {
-  videos: Set<IGameVideo>;
-  active: boolean;
-  steps: string[];
-  savedSteps: string[];
-  winners: IPlayer[];
-}
-
-export interface IGame {
   doubleWin: boolean;
-  rounds: IRound[];
+  notRusSongs: number,
 }
 
-export interface IReadyGame {
-  id: number,
-  doubleWin: boolean,
-  winners:  Set<number>;
-  rounds: IGameRound[];
-}
-
-export interface IFieldCell {
-  videoId: string;
+export interface ISong {
+  artist: string,
   name: string;
+  rus: boolean;
+  id: string;
+  start: number;
 }
 
-export interface IPlayer {
+export type ISongWithSettings = ISong & {
+  priority: boolean;
+  disabled: boolean;
+}
+
+export type NEW_IRoundSong = ISong & {
   number: number;
-  fields: IFieldCell[][];
-  lines: Set<string>[];
-  linesSimulation: Set<string>[];
+  class: string;
+  played: boolean;
 }
 
-export enum Win {
-  FirstLine = 'FirstLine',
-  Cross = 'Cross',
-  All = 'All',
+
+export interface NEW_IGame {
+  id: string;
+  rounds: NEW_IRound[]
 }
 
-export interface IWinner {
-  type: Win;
-  player: IPlayer;
-  step: number
+export interface NEW_IRound {
+  name: string;
+  field: NEW_IRoundSong[][]
+}
+
+export type NEW_IPlayingRound = NEW_IRound & {
+  //ToDo брать из настроек
+  [Winner.Line]: IWinnersSettings;
+  [Winner.Cross]: IWinnersSettings;
+  [Winner.All]: IWinnersSettings;
+}
+
+export interface IWinnersSettings {
+  count: number;
+  tickets: number[];
+  from: number;
+  to: number;
+}
+export interface NEW_IGameSettings {
+  rounds: NEW_IRoundSettings[];
+}
+
+export interface NEW_IRoundSettings {
+  roundFieldColumns: number,
+  roundFieldRows: number,
+  notRusSongs: number,
+}
+
+export interface NEW_ITicketsSettings {
+  count: number,
+  rounds: NEW_IRoundTicketsSettings[],
+}
+
+export interface NEW_IRoundTicketsSettings {
+  ticketFieldColumns: number,
+  ticketFieldRows: number,
+}
+
+export interface NEW_ITicket {
+  number: number;
+  rounds: NEW_ITicketRound[];
+}
+
+export interface NEW_ITicketRound {
+  field: NEW_IRoundSong[][];
+}
+
+export type NEW_IPlayingTicketRound = Pick<NEW_ITicket, 'number'> & NEW_ITicketRound;
+
+export enum Winner {
+  Line,
+  Cross,
+  All,
+}
+
+export interface Weight {
+  songId: string;
+  weight: number;
 }

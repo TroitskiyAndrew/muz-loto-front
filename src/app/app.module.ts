@@ -5,12 +5,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PlayerComponent } from './components/player/player.component';
 import { FieldComponent } from './components/field/field.component';
 import { GameComponent } from './components/game/game.component';
+import { ModalComponent } from './components/modal/modal.component';
 @NgModule({
   declarations: [
     AppComponent,
     PlayerComponent,
     FieldComponent,
-    GameComponent
+    GameComponent,
+    ModalComponent,
   ],
   providers: [],
   imports: [
