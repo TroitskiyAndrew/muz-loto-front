@@ -2,6 +2,6 @@
   <button *ngIf="!stateService.user" color="accent" mat-raised-button class="menuItem" (click)="login()">Войти</button>
   <button *ngIf="!stateService.user" color="accent" mat-raised-button  class="menuItem" (click)="signUp()">Регистрация</button>
   <button *ngIf="stateService.user" color="accent" mat-raised-button class="menuItem" (click)="logout()">Выйти</button>
-  <button *ngIf="stateService.game" color="accent" mat-raised-button class="menuItem" (click)="runGame()">Запустить игру</button>
+  <button color="accent" mat-raised-button class="menuItem" (click)="runGame()">Запустить игру</button>
   <button *ngIf="stateService.user" color="accent" mat-raised-button class="menuItem" (click)="createGame()">Создать игру</button>
 </div>

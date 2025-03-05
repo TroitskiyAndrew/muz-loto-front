@@ -13,9 +13,9 @@ let i = 0;
 export class AppComponent {
 
   constructor (public stateService: StateService, public modalService: ModalService, private socketService: SocketService, private authService: AuthService) {
-    this.socketService.onMessage<boolean>(SocketMessageType.Modal, ({data}) => {
-      this.modalService.submitAnswer(data);
-    });
+    // this.socketService.onMessage<boolean>(SocketMessageType.Modal, ({data}) => {
+    //   this.modalService.submitAnswer(data);
+    // });
     this.init();
   }
 

@@ -8,16 +8,16 @@ import { StateService } from './state.service';
   providedIn: 'root'
 })
 export class SocketService {
-  private socket: Socket;
+  private socket!: Socket;
   private callbacks: Callbacks = {} as Callbacks;
 
   constructor(private stateService: StateService) {
-    this.socket = io(environment.backendUrl);
-    this.socket.on('messageToClient', (data: SocketMessage<any>) => {
-      if(this.stateService.gameCode === data.gameCode &&  this.callbacks[data.type]){
-        this.callbacks[data.type](data);
-      }
-    });
+    // this.socket = io(environment.backendUrl);
+    // this.socket.on('messageToClient', (data: SocketMessage<any>) => {
+    //   if(this.stateService.gameCode === data.gameCode &&  this.callbacks[data.type]){
+    //     this.callbacks[data.type](data);
+    //   }
+    // });
   }
 
   sendMessage<T>(message: SocketMessage<T>) {

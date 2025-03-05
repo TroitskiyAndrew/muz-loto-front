@@ -40,7 +40,7 @@ export class CreatorService {
       .sort(() => Math.random() - 0.5);
     const prioritySongs = randomizedUsualSongs.filter((song) => song.priority);
     const nonPrioritySongs = randomizedUsualSongs.filter((song) => !song.priority);
-    const usedSongs = new Set<string>(randomizedMandatorySongs.map(song => song.id));
+    const usedSongs = new Set<string>(randomizedMandatorySongs.map(song => song.youtubeId));
     const game: INewGame =  {
       owner: this.stateService.user?.id || '',
       rounds: settings.rounds.map((round, index) => {
@@ -133,17 +133,17 @@ export class CreatorService {
     let notRusSongsNeed =
       round.notRusSongs - result.filter((song) => !song.rus).length;
     songs.forEach((song) => {
-      if (!usedSongs.has(song.id) && !usedArtists.has(song.artist)) {
+      if (!usedSongs.has(song.youtubeId) && !usedArtists.has(song.artist)) {
         if (song.rus && rusSongsNeed) {
           result.push(song);
           rusSongsNeed--;
-          usedSongs.add(song.id);
+          usedSongs.add(song.youtubeId);
           usedArtists.add(song.artist);
         }
         if (!song.rus && notRusSongsNeed) {
           result.push(song);
           notRusSongsNeed--;
-          usedSongs.add(song.id);
+          usedSongs.add(song.youtubeId);
           usedArtists.add(song.artist);
         }
       }
