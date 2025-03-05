@@ -16,7 +16,7 @@ import { AuthService } from './auth.service';
 })
 export class StateService {
   public showCards = false;
-  public logo = 'beer';
+  public logo = 'weli';
   gameCode = "";
   user: IUser | null = null;
   $init = new Subject<boolean>();
