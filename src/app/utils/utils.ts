@@ -1,4 +1,3 @@
-import { IVideo } from "../models/models";
 
 export function extractVideoId(url: string): string | null {
   const pattern = /youtu\.be\/([\w-]+)/;
@@ -12,6 +11,6 @@ export function extractTimestamp(url: string): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
-export function getMusician(song: IVideo){
-  return song.name.split(';')[0];
+export function getRandomElem<T>(array: T[]): T{
+  return [...array].sort(() => Math.random() - 0.5)[0];
 }

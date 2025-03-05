@@ -1,0 +1,37 @@
+:host {
+  position: absolute;
+  top: 0;
+  z-index: 1000;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  background-color: #80808096;
+}
+
+.dialog {
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+
+  &__buttons {
+    display: flex;
+    justify-content: space-around;
+    &__item {
+      padding: 10px 40px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .accept {
+      background-color: green;
+    }
+    .reject {
+      background-color: red;
+    }
+  }
+}

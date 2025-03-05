@@ -2,39 +2,38 @@
   <ng-container *ngIf="!stateService.showCards">
     <div *ngIf="!isGameStarted" class="game__start" (click)="startGame()">
       <img src="assets/logo.png" alt="">
-     </div>
-    <ng-container *ngFor="let round of stateService.game.rounds; let i = index">
-      <div *ngIf="round.active"  class="game__round" (click)="play(i, $event)" (contextmenu)="rightClick($event)">
-        <div class="game__round__name"> {{round.name}}</div>
-        <!-- <img src="assets/Финал.png" alt="" class="game__logo"> -->
-        <div class="game__round__field">
-          <app-field [round]="round"></app-field>
-          <app-player class="game__round__player"></app-player>
-        </div>
-        <div class="game__round__last-song">
-          <span *ngIf="showName"> {{ selectedVideo?.name?.split(';')?.join(' - ') }}</span>
-        </div>
+    </div>
+    <div *ngIf="isGameStarted" class="game__round" (click)="handleClick($event)"
+      (contextmenu)="rightClick($event)">
+      <div class="game__round__name"> {{currentRound.name}}</div>
+      <!-- <img src="assets/Финал.png" alt="" class="game__logo"> -->
+      <div class="game__round__field">
+        <app-field [round]="currentRound"></app-field>
+
       </div>
-    </ng-container>
+      <div class="game__round__last-song">
+        <span *ngIf="showName"> {{ [selectedSong?.artist || '', selectedSong?.name || ''].join(' - ') }}</span>
+      </div>
+    </div>
   </ng-container>
 
 
   <ng-container *ngIf="stateService.showCards">
-    <div *ngFor="let player of game.rounds[roundIndex].players" class="player-section player">
+    <div *ngFor="let ticket of currentRoundTickets" class="player-section player">
       <!-- <div *ngFor="let round of game.rounds; let roundIndex = index;" class="player-section__round"> -->
-      <div  class="player-section__round">
+      <div class="player-section__round">
         <div class="ticket-head">
-          <div class="ticket-head__name">Билет №{{player.number}}</div>
+          <div class="ticket-head__name">Билет №{{ticket.number}}</div>
           <div class="ticket-head__name">{{game.rounds[roundIndex].name}}</div>
           <img class="ticket-head__logo" [src]="'assets/' + stateService.logo + '.png'" alt="">
         </div>
         <table class="table-bordered">
           <tbody>
-            <tr *ngFor="let row of getPlayer(roundIndex, player.number)?.fields">
-              <td  *ngFor="let cell of row">
+            <tr *ngFor="let row of ticket.field">
+              <td *ngFor="let cell of row">
                 <div class="player-cell">
-                  <div>{{ cell.name.split(';')[0] }}</div>
-                  <div>{{ cell.name.split(';')[1] }}</div>
+                  <div>{{ cell.name }}</div>
+                  <div>{{ cell.artist }}</div>
 
                 </div>
               </td>
@@ -45,7 +44,6 @@
     </div>
   </ng-container>
 
-
   <!-- <div *ngIf="isGameStarted"  class="game__next-round" (click)="showExample()"> Пример </div> -->
 </div>
-
+<img class="logo" [src]="'assets/' + stateService.logo + '.png'" alt="">

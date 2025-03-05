@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { PlayerService } from '../../services/player.service';
-import { IGameVideo, IVideo } from '../../models/models';
+import { ISong } from '../../models/models';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { StateService } from '../../services/state.service';
@@ -18,10 +18,19 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
   private backgroundPlayer: any;
   sub!: Subscription;
   iframe: any;
-  isPlaying = false;
   switching = false;
+  block = false;
 
   constructor(private el: ElementRef, private renderer: Renderer2, private playerService: PlayerService, private stateService: StateService) {}
+
+  @HostListener('click', ['$event'])
+  onClick(event: MouseEvent) {
+    event.stopImmediatePropagation();
+    if(this.block){
+      return;
+    }
+    this.playerService.stop();
+  }
 
   ngAfterViewInit() {
     // Проверяем, если API уже загружен
@@ -58,9 +67,9 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
         onReady: () => {
           this.player.setVolume(0);
           this.playerService.$init.next(true);
-          const iframe = document.querySelector('app-player > iframe') as HTMLIFrameElement;
-          iframe.style.width = `170%`;
-          iframe.style.height = `220%`;
+          const iframe = document.querySelector('app-player > .player-wrapper > iframe') as HTMLIFrameElement;
+          iframe.style.width = `100%`;
+          iframe.style.height = `100%`;
           this.sub = this.playerService.$video.subscribe((video) => {
             this.play(video);
           });
@@ -83,15 +92,18 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
       },
       events: {
         onReady: () => {
-          this.backgroundPlayer.setVolume(0);
-          this.backgroundPlayer.seekTo(930, true);
-          // const iframe = document.querySelector('.background-player > iframe') as HTMLIFrameElement;
-          this.increaseVolume(false, false);
-          this.backgroundPlayer.playVideo();
+          this.sub = this.playerService.$playBackGround.subscribe((backgroundMusic) => {
+            this.playerService.backgroundMusic = backgroundMusic;
+            this.player.loadVideoById(backgroundMusic.youtubeId);
+            this.backgroundPlayer.setVolume(0);
+            this.backgroundPlayer.seekTo(backgroundMusic.start, true);
+            this.increaseVolume(false, false);
+            this.backgroundPlayer.playVideo();
+          });
         },
         onStateChange: (event: any) => {
           if (event.data === 0){
-            this.backgroundPlayer.seekTo(930, true);
+            this.backgroundPlayer.seekTo(this.playerService.backgroundMusic.start, true);
           }
         },
       }
@@ -99,23 +111,30 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
 
   }
 
-  private play(video: IGameVideo) {
-    const {id , start}  = video;
-    this.player.loadVideoById(id);
+  private play(video: ISong) {
+    this.block = true;
+    (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex = '100';
+    const {youtubeId , start}  = video;
+    this.player.loadVideoById(youtubeId);
     this.player.playVideo();
+    setTimeout(() => {
+      this.block = false;
+    }, this.playerService.gameMode ? (environment.playerDelay * 1000 + 2000) : 1000);
     setTimeout(() => {
       this.player.seekTo(start, true);
 
       this.increaseVolume(true, true);
       this.increaseVisibility();
-    }, environment.playerDelay * 1000);
+    }, this.playerService.gameMode ? (environment.playerDelay * 1000) : 500 );
   }
 
   stop(){
-    this.decreaseVolume(true, true);
+
+    this.decreaseVolume(true, this.playerService.gameMode);
     this.decreaseVisibility();
     setTimeout(() => {
       this.renderer.setStyle(this.el.nativeElement, 'opacity', '0');
+      (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex = '-100';
       this.player.stopVideo();
     }, (100/environment.videoStep) * environment.videoStepDuration)
   }

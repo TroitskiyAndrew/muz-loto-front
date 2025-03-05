@@ -1,274 +1,346 @@
-import { Component } from '@angular/core';
-import { IGame, IGameRound, IGameVideo, IVideo, IWinner, Win } from '../../models/models';
+import { Component, OnDestroy } from '@angular/core';
+import {
+  IGameSettings,
+  IGame,
+  IPlayingTicket,
+  IRound,
+  IRoundSong,
+  ITicket,
+  SocketMessageType,
+  TicketsMessagePayload,
+  Weight,
+  Winner,
+} from '../../models/models';
 import { PlayerService } from '../../services/player.service';
 import { environment } from '../../../environments/environment';
 import { StateService } from '../../services/state.service';
+import { CreatorService } from '../../services/creator.service';
+import { getRandomElem } from '../../utils/utils';
+import { ModalService } from '../../services/modal.service';
+import { SocketService } from '../../services/socket.service';
+import { DialogService } from '../../services/dialog.service';
+import { FormControl, Validators } from '@angular/forms';
+
+const DEEP = 0;
+
+const WIN_NAMING = {
+  [Winner.Line]: 'Линию',
+  [Winner.Cross]: 'Крест',
+  [Winner.All]: 'Все песни',
+}
 
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
-  styleUrl: './game.component.scss'
+  styleUrl: './game.component.scss',
 })
-export class GameComponent {
-  public game = this.stateService.game;
-  public currentRound = 0;
+export class GameComponent implements OnDestroy{
   public isGameStarted = false;
-  public selectedVideo: IGameVideo | null = null;
-  public isPlaying = false;
-  public block = false;
   public showName = false;
-  winFirstLine = false;
-  winCross = false;
-  winAll = false;
-  step = 0;
-  winners = {
-    [Win.FirstLine]: {
-      step: 0,
-      winners: [] as number[]
-    },
-    [Win.Cross]: {
-      step: 0,
-      winners: [] as number[]
-    },
-    [Win.All]: {
-      step: 0,
-      winners: [] as number[]
-    },
-  }
-  simulation = false;
-  simulationAttempt = 0;
+  wantedWinner: Winner | null = Winner.Line;
+  time = 0;
+  currentStep = 0;
+  songsArray: string[] = [];
+  deep = DEEP;
+  boost = 1000;
+  errors = 0;
+  gameWinners: number[] = [];
+  wastedTickets:  number[] = [];
+  game!: IGame;
+  currentRound!: IRound;
+  currentRoundTickets: IPlayingTicket[] = [];
+  selectedSong: IRoundSong | null = null;
+  playedSongs: string[] = [];
   roundIndex = 0;
+  currentWinners: Set<number> = new Set();
+  simulation = false;
 
 
-
-  constructor(private playerService: PlayerService, public stateService: StateService) { }
+  constructor(
+    private playerService: PlayerService,
+    public stateService: StateService,
+    private creatorService: CreatorService,
+    private modalService: ModalService,
+    private socketService: SocketService,
+    private dialogService: DialogService,
+  ) {
+    // this.simulateGames(50);
+    this.playerService.gameMode = true;
+    this.playerService.playBackGround();
+    this.socketService.onMessage<boolean | null>(SocketMessageType.Player, ({data}) => {
+      if(data === true){
+        this.nextSong();
+      } else if(data === false){
+        this.playerService.stop();
+      }
+    });
+    this.socketService.onMessage<TicketsMessagePayload>(SocketMessageType.Tickets, ({data}) => {
+      if(data.add){
+        this.wastedTickets = Array.from(new Set([...this.wastedTickets, ...data.tickets]))
+      } else {
+        this.wastedTickets = this.wastedTickets.filter(ticket => !data.tickets.includes(ticket))
+      }
+    });
+    this.game = this.stateService.game!;
+  }
 
   startGame() {
-    this.isGameStarted = true;
-    this.stateService.initGame();
-    this.game = this.stateService.game;
-    this.game.rounds[this.currentRound].active = true;
-    this.stateService.$nextRound.subscribe(() => {
-      if (this.isGameStarted && this.game.rounds[this.currentRound + 1]){
-        this.nextRound();
-      }
-    })
+    if(this.roundIndex){
+      this.prepareRound();
+      return;
+    }
+    // this.game = this.creatorService.generateGame();
+    this.playNewGame();
+    // this.simulateGames(10)
   }
 
-  dropWinners() {
-    this.winFirstLine = false;
-    this.winCross = false;
-    this.winAll = false;
-    this.step = 0;
-    this.winners = {
-      [Win.FirstLine]: {
-        step: 0,
-        winners: []
-      },
-      [Win.Cross]: {
-        step: 0,
-        winners: []
-      },
-      [Win.All]: {
-        step: 0,
-        winners: []
-      },
+  simulateGames(count: number) {
+    for (let index = 0; index < count; index++) {
+      this.simulateNewGame();
+      console.log(`${this.errors}/${(index + 1)*2}`)
     }
   }
 
-  play(round: number, event: Event) {
-    event?.stopImmediatePropagation();
+  simulateNewGame() {
+    // this.game = this.creatorService.generateGame();
+    this.gameWinners = [];
+    this.wastedTickets = this.game.tickets.map(ticket => ticket.number).filter(number => number > 10);
+
+    for (let i = 0; i < this.game.rounds.length; i++) {
+      this.roundIndex = i;
+      this.simulateRound();
+    }
+  }
+
+  simulateRound() {
+    this.prepareRound();
+    console.log('players ', this.currentRoundTickets.length -  this.wastedTickets.length);
+    this.simulateStep();
+  }
+
+
+  simulateStep(){
+    this.currentStep++;
+    this.deep = DEEP + Math.floor(this.currentStep / 10);
+    const selectedSongId = this.selectSong();
+    this.currentWinners = this.getWinners(selectedSongId);
+    this.playedSongs.push(selectedSongId);
+
+    if (this.wantedWinner && this.currentWinners.size > (this.currentRound[this.wantedWinner].count || 99)) {
+      this.errors++
+    }
+    if(this.currentWinners.size){
+      this.submitWin();
+    }
+    if(this.playedSongs.length < this.roundSongs.length){
+      this.simulateStep();
+    }
+  }
+
+  playNewGame(){
+    this.gameWinners = [];
+    this.wastedTickets = [];
+    this.roundIndex = 0;
+    this.prepareRound();
+  }
+
+  prepareRound() {
     this.showName = false;
+    this.playedSongs = [];
+    this.currentStep = 0;
+    this.wantedWinner = Winner.Line;
+    this.currentRound = this.game.rounds[this.roundIndex];
+    this.currentRoundTickets = this.game.tickets.map((ticket) => {
+      return {
+        number: ticket.number,
+        field: ticket.rounds[this.roundIndex].field,
+      }
+    });
+    this.isGameStarted = true;
+  }
+
+  handleClick(event: Event){
+    event?.stopImmediatePropagation();
+    this.nextSong();
+  }
+
+  nextSong() {
     if (!this.playerService.$init.value) {
       return;
     }
-    if (this.isPlaying) {
-
-      if (!this.simulation) {
-        if (this.block) {
-          return;
-        }
-        this.isPlaying = false;
-        this.playerService.$stop.next(undefined);
-        this.showName = true;
-      } else {
-        this.isPlaying = false;
-        this.play(round, new Event(''))
-      }
-
+    if (this.playedSongs.length === this.roundSongs.length){
+      this.isGameStarted = false;
+      this.roundIndex++;
       return;
     }
-    if (this.selectedVideo) {
-      this.selectedVideo.class = '';
-    }
-    this.step++;
-    this.isPlaying = true;
-
-    this.game.rounds[round].videos.forEach(video => {
-      video.class = '';
-      if (video.id === this.selectedVideo?.id) {
-        video.played = true;
-      }
-    })
-    this.selectedVideo = null;
-    const videos = [...this.game.rounds[round].videos].filter(video => !video.played);
-    if (videos.length === 0) {
-      if (this.simulation) {
-        const { lineWinners, crossWinners, allWinners } = this.game.rounds[round];
-        const winners = [...this.winners[Win.FirstLine].winners, ...this.winners[Win.Cross].winners, ...this.winners[Win.All].winners];
-        if (
-          lineWinners !== this.winners[Win.FirstLine].winners.length ||
-          crossWinners !== this.winners[Win.Cross].winners.length ||
-          allWinners !== this.winners[Win.All].winners.length ||
-          (!this.game.rounds[round].doubleWin && winners.length > new Set(winners).size) ||
-          (!this.game.doubleWin && winners.some(winner => this.game.winners.has(winner)))
-        ) {
-          this.dropWinners();
-          console.log('attempt',++this.simulationAttempt);
-          this.game.rounds[round].players.forEach(player => {
-            player.linesSimulation = [...player.lines].map(line => {
-              return new Set([...line])
-            })
-          });
-
-          this.game.rounds[round].steps = [];
-          this.game.rounds[round].videos.forEach(video => video.played = false)
-          setTimeout(() => this.play(round, new Event('')), 10);
-          return;
-        }
-        this.game.rounds[round].players.forEach(player => {
-            player.linesSimulation = [...player.lines].map(line => {
-              return new Set([...line])
-            })
-          });
-        console.log('FirstLine', this.winners[Win.FirstLine].step, this.winners[Win.FirstLine].winners)
-        console.log('Cross', this.winners[Win.Cross].step, this.winners[Win.Cross].winners)
-        console.log('All', this.winners[Win.All].step, this.winners[Win.All].winners);
-        console.log(this.winners);
-        [...this.game.rounds[round].videos].forEach(video => video.played = false);
-        winners.forEach(winner => this.game.winners.add(winner));
-        this.game.rounds[round].savedSteps = [...this.game.rounds[round].steps];
-        this.dropWinners();
-        this.isPlaying = false;
-        if ((this.currentRound + 1) < this.game.rounds.length) {
-          this.game.rounds[round].active = false
-          this.currentRound++;
-          this.game.rounds[this.currentRound].active = false
-          this.play(this.currentRound, new Event(''));
-        } else {
-          this.stateService.saveGame();
-          this.currentRound = 0;
-          this.stateService.showCards = true;
-        }
-      }
-      console.log('end');
-      return;
-    }
-    let selectedVideo = this.selectVideo(this.game.rounds[round]);
-    this.game.rounds[round].steps.push(selectedVideo.id);
-
-    const winners: IWinner[] = [];
-    const players = this.game.rounds[round].players;
-    players.forEach(player => {
-      let completedRows = 0;
-      let completedColumns = 0;
-      let hasCells = false;
-      player.linesSimulation.forEach((line, index) => {
-        const hasSong = line.has(selectedVideo.id)
-        line.delete(selectedVideo.id);
-        if (hasSong && !line.size) {
-          const isRow = index <= this.game.rounds[round].playerFieldRows;
-          isRow ? completedRows++ : completedColumns++;
-        }
-        if (line.size) {
-          hasCells = true;
-        }
-      });
-      if (!this.winFirstLine && (completedRows || completedColumns)) {
-        winners.push({ type: Win.FirstLine, player, step: this.step });
-
-      }
-      if (!this.winCross && (completedRows && completedColumns)) {
-        winners.push({ type: Win.Cross, player, step: this.step })
-      }
-      if (!this.winAll && !hasCells) {
-        winners.push({ type: Win.All, player, step: this.step })
-      }
-    })
-    winners.forEach(winner => {
-      if (!this.winFirstLine && winner.type === Win.FirstLine) {
-        this.winFirstLine = true;
-      }
-      if (!this.winCross && winner.type === Win.Cross) {
-        this.winCross = true;
-      }
-      if (!this.winAll && winner.type === Win.All) {
-        this.winAll = true;
-      }
-    });
-    const firstLineWinners = winners.filter(winner => winner.type == Win.FirstLine);
-    if (firstLineWinners.length) {
-      this.winners[Win.FirstLine].winners = firstLineWinners.map(winner => winner.player.number);
-      this.winners[Win.FirstLine].step = this.step;
-    }
-    const crossWinners = winners.filter(winner => winner.type == Win.Cross);
-    if (crossWinners.length) {
-      this.winners[Win.Cross].winners = crossWinners.map(winner => winner.player.number);
-      this.winners[Win.Cross].step = this.step;
-    }
-    const allWinners = winners.filter(winner => winner.type == Win.All);
-    if (allWinners.length) {
-      this.winners[Win.All].winners = allWinners.map(winner => winner.player.number);
-      this.winners[Win.All].step = this.step;
-    }
-    this.selectedVideo = selectedVideo;
-    videos.forEach(video => video.class = '');
-    if (this.simulation) {
-      selectedVideo.played = true;
-      setTimeout(() => this.play(round, event));
-    } else {
-      const interval = setInterval(() => {
-        videos.forEach(video => video.class = '');
-        videos[Math.floor(Math.random() * videos.length)].class = 'blue';
-      }, 250);
-      this.block = true;
-      this.playerService.$video.next(selectedVideo);
-      setTimeout(() => {
-        clearInterval(interval);
-        videos.forEach(video => video.class = '');
-        selectedVideo.class = 'green';
-        this.selectedVideo = selectedVideo;
-      }, (environment.playerDelay * 1000) - 500);
-      setTimeout(() => {
-        this.selectedVideo!.played = true;
-        this.block = false;
-      }, (environment.playerDelay * 1000) + 2000);
-
-    }
-
-
-
+    this.handleStart();
   }
 
-  rightClick(event: Event){
+  handleStop(){
+    this.showName = true;
+    this.selectedSong!.played = true;
+    if (this.currentWinners.size ) {
+      this.askWinner(this.currentWinners);
+    }
+  }
+
+  handleStart() {
+    this.showName = false;
+    this.currentStep++;
+    this.deep = DEEP + Math.floor(this.currentStep / 10);
+    this.selectedSong = null;
+    const availableSongs = this.roundSongs.filter(song => !this.playedSongs.includes(song.youtubeId)).sort(() => Math.random() - 0.5);
+    let randomizerIndex = 0;
+    const randomizerInterval = setInterval(() => {
+      this.roundSongs.forEach((song) => (song.class = ''));
+      availableSongs[randomizerIndex++ % availableSongs.length].class = 'blue';
+    }, this.simulation ? 0 : 250);
+
+    const selectedSongId = this.selectSong();
+    this.selectedSong = this.roundSongs.find(song => song.youtubeId === selectedSongId)!;
+    const playPromise = this.simulation ? Promise.resolve() : this.playerService.play(this.selectedSong);
+    playPromise.then(this.handleStop.bind(this));
+
+    setTimeout(() => {
+      clearInterval(randomizerInterval);
+      this.roundSongs.forEach((song) => (song.class = ''));
+      this.selectedSong!.class = 'green';
+    }, this.simulation ? 0 : environment.playerDelay * 1000 - 500);
+    this.currentWinners = this.getWinners(selectedSongId);
+    this.playedSongs.push(selectedSongId);
+  }
+
+
+
+  get playingTickets () {
+    return this.currentRoundTickets.filter(ticket => !this.wastedTickets.includes(ticket.number));
+  }
+
+  get roundSongs() {
+    return this.currentRound.field.flat();
+  }
+
+  selectSong(): string{
+    const weights = this.getWeights();
+    const selectedWeight = weights.sort((a, b) => b.weight - a.weight)[0];
+    return selectedWeight.songId;
+  }
+
+  getWinners(selectedSongId: string,playedSongs?: string[]): Set<number>{
+    return this.playingTickets.reduce((result, ticket) => {
+      const isWinner = this.trySongInTicket(selectedSongId, ticket, playedSongs ?? this.playedSongs)
+      if (isWinner) {
+        result.add(ticket.number)
+      }
+      return result;
+    }, new Set<number>);
+  }
+
+  getWeights(): Weight[] {
+    const weights = [];
+    const songs = this.currentRound.field.flat().map(song => song.youtubeId).filter(songId => !this.playedSongs.includes(songId)).sort(() => Math.random() - 0.5);
+    for (const songId of songs) {
+      const weight = this.getWeightsForSong(songId, songs, this.playedSongs);
+      weights.push({ songId, weight })
+    }
+    return weights;
+  }
+
+  getWeightsForSong(songId: string, songs: string[], playedSongs: string[]): number {
+    if (this.currentStep <= 7 || this.wantedWinner == null || this.deep === 0) {
+      return 1;
+    }
+    const restOfSongs = songs.filter(song => song !== songId);
+    if ( !songs.length) {
+      return -this.boost;
+    }
+    const currentWinners = this.getWinners(songId, playedSongs);
+    const step = this.currentStep + (DEEP - this.deep)
+    const weight = this.getResultWeight(currentWinners, step);
+    if(weight != null){
+      return weight;
+    }
+
+    let success = 0;
+    const level = this.deep;
+    --this.deep;
+    for (const subSongId of restOfSongs) {
+      const weight = this.getWeightsForSong(subSongId, restOfSongs, [...playedSongs, songId]);
+      success += weight;
+    }
+    this.deep = level;
+    return success / songs.length;
+  }
+
+  askWinner(currentWinners: Set<number>){
+    const winnerQuestion = `Билет${currentWinners.size > 1 ? 'ы' : ''} #${Array.from(currentWinners).join(', ')} собрал${currentWinners.size > 1 ? 'и' : ''} ${WIN_NAMING[this.wantedWinner!]}. Билет в игре?`;
+    this.modalService.openModal(winnerQuestion).then(answer => {
+      if(answer){
+        this.submitWin();
+      }
+    });
+  }
+
+  submitWin(){
+    console.log(`Билеты № ${Array.from(this.currentWinners)} выиграли ${WIN_NAMING[this.wantedWinner!]} в ${this.currentRound.name} на ${this.currentStep} ходу`);
+    this.wantedWinner = this.wantedWinner === Winner.Line ? Winner.Cross : this.wantedWinner === Winner.Cross ? Winner.All : null;
+    this.gameWinners.push(...Array.from(this.currentWinners));
+  }
+
+  getResultWeight(currentWinners: Set<number>, step: number): number | null {
+    const winnersArray = Array.from(currentWinners);
+    const { count, tickets } = this.currentRound[this.wantedWinner!];
+    if (winnersArray.length > count || winnersArray.some(winner => this.gameWinners.includes(winner))) {
+      return -this.boost * 10;
+    }
+    // if (currentWinners.length > count) {
+    //   return -this.boost * 1000;
+    // }
+    if(tickets.length && winnersArray.length === count && winnersArray.every(winner => tickets.includes(winner))){
+      return this.boost * 1000;
+    }
+    if (winnersArray.length === count){
+      let result = this.boost--;
+      if (this.boost === 501) {
+        this.boost = 1000;
+      }
+      return result;
+    }
+    return null
+  }
+
+  trySongInTicket(songId: string, ticket: IPlayingTicket, playedSongs: string[]): boolean {
+    let result = false;
+    const linesSimulation = ticket.field.map(
+      (row) => new Set(row.filter(song => !playedSongs.includes(song.youtubeId)).map((song) => song.youtubeId))
+    );
+    for (let columnIndex = 0; columnIndex < ticket.field.length; columnIndex++) {
+      linesSimulation.push(new Set(ticket.field.filter(row => !playedSongs.includes(row[columnIndex].youtubeId)).map((row) => row[columnIndex].youtubeId)));
+    }
+    const horizontalLines = linesSimulation.slice(0, linesSimulation.length / 2);
+    const verticalLines = linesSimulation.slice(linesSimulation.length / 2);
+    const verticalWin = verticalLines.some(line => line.has(songId) && line.size === 1);
+    const horizontalWin = horizontalLines.some(line => line.has(songId) && line.size === 1);
+    if (this.wantedWinner === Winner.Line && (verticalWin || horizontalWin)) {
+      result = true;
+    }
+    if (this.wantedWinner === Winner.Cross && (verticalWin && horizontalWin)) {
+      result = true;
+    }
+    if (this.wantedWinner === Winner.All) {
+      const rest = new Set([...verticalLines, ...horizontalLines].map(s => [...s]).flat());
+      if (rest.has(songId) && rest.size === 1) {
+        result = true;
+      }
+    }
+    return result;
+  }
+
+  rightClick(event: Event) {
     event.stopImmediatePropagation();
     event.preventDefault();
   }
 
-  private selectVideo(round: IGameRound) {
-    if (round.savedSteps.length){
-      if(![...round.videos].find(video => video.id === round.savedSteps[this.step -1])){
-        console.log('');
-      }
-      return [...round.videos].find(video => video.id === round.savedSteps[this.step -1])!;
-    }
-    const videos = [...round.videos].filter(video => !video.played);
-    // const priorityVideos = videos.filter(video => video.priority);
-    // if(priorityVideos.length){
-    //   return priorityVideos[Math.floor(Math.random() * priorityVideos.length)];
-    // }
-    return videos[Math.floor(Math.random() * videos.length)];
-  }
 
   showExample() {
     const video = {
@@ -278,24 +350,14 @@ export class GameComponent {
       start: 0,
       played: false,
       class: '',
-      id: 'Hy8kmNEo1i8',
-    }
+      youtubeId: 'Hy8kmNEo1i8',
+    };
 
     // this.playerService.$video.next(video);
   }
 
-  getPlayer(round: number, number: number){
-    return this.game.rounds[round].players.find(player => player.number === number)
-  }
-
-  nextRound() {
-    this.selectedVideo = null;
-    this.isPlaying = false;
-    this.dropWinners();
-    this.game.rounds[this.currentRound++].active = false;
-    this.game.rounds[this.currentRound].active = true;
+  ngOnDestroy(): void {
+    this.playerService.gameMode = false;
   }
 
 }
-
-
