@@ -21,12 +21,12 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
   switching = false;
   block = false;
 
-  constructor(private el: ElementRef, private renderer: Renderer2, private playerService: PlayerService, private stateService: StateService) {}
+  constructor(private el: ElementRef, private renderer: Renderer2, private playerService: PlayerService, private stateService: StateService) { }
 
   @HostListener('click', ['$event'])
   onClick(event: MouseEvent) {
     event.stopImmediatePropagation();
-    if(this.block){
+    if (this.block) {
       return;
     }
     this.playerService.stop();
@@ -100,9 +100,12 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
             this.increaseVolume(false, false);
             this.backgroundPlayer.playVideo();
           });
+          this.sub = this.playerService.$stopBackGround.subscribe(() => {
+            this.decreaseVolume(false, false);
+                      });
         },
         onStateChange: (event: any) => {
-          if (event.data === 0){
+          if (event.data === 0) {
             this.backgroundPlayer.seekTo(this.playerService.backgroundMusic.start, true);
           }
         },
@@ -114,7 +117,7 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
   private play(video: ISong) {
     this.block = true;
     (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex = '100';
-    const {youtubeId , start}  = video;
+    const { youtubeId, start } = video;
     this.player.loadVideoById(youtubeId);
     this.player.playVideo();
     setTimeout(() => {
@@ -125,10 +128,10 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
 
       this.increaseVolume(true, true);
       this.increaseVisibility();
-    }, this.playerService.gameMode ? (environment.playerDelay * 1000) : 500 );
+    }, this.playerService.gameMode ? (environment.playerDelay * 1000) : 500);
   }
 
-  stop(){
+  stop() {
 
     this.decreaseVolume(true, this.playerService.gameMode);
     this.decreaseVisibility();
@@ -136,14 +139,14 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
       this.renderer.setStyle(this.el.nativeElement, 'opacity', '0');
       (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex = '-100';
       this.player.stopVideo();
-    }, (100/environment.videoStep) * environment.videoStepDuration)
+    }, (100 / environment.videoStep) * environment.videoStepDuration)
   }
 
   increaseVolume(main: boolean, switching: boolean) {
-    if(!main){
+    if (!main) {
       this.backgroundPlayer.playVideo()
     }
-    if(switching){
+    if (switching) {
       this.decreaseVolume(!main, false);
     }
     const player = main ? this.player : this.backgroundPlayer;
@@ -159,7 +162,7 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
   }
 
   decreaseVolume(main: boolean, switching: boolean) {
-    if(switching){
+    if (switching) {
       this.increaseVolume(!main, false);
     }
     const player = main ? this.player : this.backgroundPlayer;
@@ -169,7 +172,7 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
         currentVolume -= environment.videoStep;
         player.setVolume(currentVolume);
       } else {
-        if(!main){
+        if (!main) {
           this.backgroundPlayer.pauseVideo();
         }
         clearInterval(interval);

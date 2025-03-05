@@ -12,6 +12,7 @@ export class PlayerService {
   public $init = new BehaviorSubject<boolean>(false);
   public $stop = new Subject();
   public $playBackGround = new Subject<IBackgroundMusic>();
+  public $stopBackGround = new Subject<void>();
   public backgroundMusic:IBackgroundMusic = DEFAULT_BACKGROUND_MUSIC;
   public gameMode = false;
 
@@ -42,6 +43,9 @@ export class PlayerService {
 
   playBackGround(backgroundMusic?: IBackgroundMusic){
     this.$playBackGround.next(backgroundMusic || this.backgroundMusic);
+  }
+  stopBackGround(){
+    this.$stopBackGround.next();
   }
 
 

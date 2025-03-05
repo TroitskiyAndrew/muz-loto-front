@@ -358,6 +358,7 @@ export class GameComponent implements OnDestroy{
 
   ngOnDestroy(): void {
     this.playerService.gameMode = false;
+    this.playerService.stopBackGround();
   }
 
 }
