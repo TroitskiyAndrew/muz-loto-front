@@ -176,12 +176,17 @@ export class CreateGamePageComponent {
   }
 
   async createGame() {
-    const game = this.creatorService.generateGame(
+    const game = await this.creatorService.generateGame(
       this.songsWithSettings,
       this.form.getRawValue()
     );
-    this.stateService.game = game;
-    this.router.navigate(['game'])
+    const tickets = await this.creatorService.generateTickets(
+      game,
+      this.form.getRawValue()
+    );
+    this.stateService.ticketsHolder[game.id] = tickets;
+    localStorage.setItem('ticketsHolder', JSON.stringify(this.stateService.ticketsHolder));
+    this.router.navigate(['/'])
   }
 
   playBackground() {

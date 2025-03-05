@@ -52,11 +52,18 @@ export interface IGame {
   id: string;
   code: string;
   owner: string;
-  tickets: ITicket[]
   rounds: IRound[];
   results: IGameResults;
   backgroundMusic: IBackgroundMusic;
 }
+
+export interface IGameTickets {
+  id: string;
+  gameId: string;
+  tickets: ITicket[];
+}
+
+export type INewGameTickets  = Omit<IGameTickets, 'id'>
 
 export type INewGame  = Omit<IGame, 'id'>
 

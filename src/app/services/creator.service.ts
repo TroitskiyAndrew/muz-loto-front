@@ -13,15 +13,16 @@ import {
 import { StateService } from './state.service';
 import { DEFAULT_BACKGROUND_MUSIC } from '../constants/constants';
 import { SongsService } from './songs.service';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CreatorService {
 
-  constructor(private stateService: StateService, private songsService: SongsService) {}
+  constructor(private stateService: StateService, private songsService: SongsService, private apiService: ApiService) {}
 
-  public generateGame(songs: ISongWithSettings[], settings: IGameSettings): IGame {
+  public async generateGame(songs: ISongWithSettings[], settings: IGameSettings): Promise<IGame> {
     const {mandatorySongs, usualSongs} = songs.reduce((result, song) => {
       if(song.disabled){
         return result;
@@ -97,7 +98,6 @@ export class CreatorService {
         };
       }),
       backgroundMusic: settings.backgroundMusic,
-      tickets: [] as ITicket[],
       code: this.generateCode(),
       results: {
         lastStart: null,
@@ -106,9 +106,11 @@ export class CreatorService {
         rounds: [],
       },
     };
-    const result = {...game, id: ''};
-    result.tickets = this.generateTickets(game, settings);
-    return result;
+    const createdGame = await this.apiService.createGame(game);
+    if(!createdGame){
+      throw new Error('Не смог создать игру')
+    }
+    return createdGame;
   }
 
   generateCode(): string {
@@ -151,7 +153,7 @@ export class CreatorService {
     return result;
   }
 
-  private generateTickets(game: INewGame, settings: IGameSettings): ITicket[] {
+  public async generateTickets(game: IGame, settings: IGameSettings): Promise<ITicket[]> {
     const result: ITicket[] = [];
     for (let ticketIndex = 0; ticketIndex < settings.tickets; ticketIndex++) {
       const ticket: ITicket = {
@@ -196,11 +198,8 @@ export class CreatorService {
 
       result.push(ticket);
     }
-    return result;
-  }
-
-  public createNewTickets(game: INewGame, settings: IGameSettings){
-    game.tickets = this.generateTickets(game, settings);
+    // const tickets = await this.apiService.createTickets({gameId: game.id, tickets: result}) || []
+    return result.map(t => ({...t, id: 'qwerrbxcbsdfg'}));
   }
 
 }

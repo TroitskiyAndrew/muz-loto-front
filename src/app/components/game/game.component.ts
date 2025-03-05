@@ -54,6 +54,7 @@ export class GameComponent implements OnDestroy{
   roundIndex = 0;
   currentWinners: Set<number> = new Set();
   simulation = false;
+  tickets: ITicket[] = [];
 
 
   constructor(
@@ -81,7 +82,7 @@ export class GameComponent implements OnDestroy{
         this.wastedTickets = this.wastedTickets.filter(ticket => !data.tickets.includes(ticket))
       }
     });
-    this.game = this.stateService.game!;
+
   }
 
   startGame() {
@@ -104,7 +105,7 @@ export class GameComponent implements OnDestroy{
   simulateNewGame() {
     // this.game = this.creatorService.generateGame();
     this.gameWinners = [];
-    this.wastedTickets = this.game.tickets.map(ticket => ticket.number).filter(number => number > 10);
+    this.wastedTickets = this.tickets.map(ticket => ticket.number).filter(number => number > 10);
 
     for (let i = 0; i < this.game.rounds.length; i++) {
       this.roundIndex = i;
@@ -150,7 +151,7 @@ export class GameComponent implements OnDestroy{
     this.currentStep = 0;
     this.wantedWinner = Winner.Line;
     this.currentRound = this.game.rounds[this.roundIndex];
-    this.currentRoundTickets = this.game.tickets.map((ticket) => {
+    this.currentRoundTickets = this.tickets.map((ticket) => {
       return {
         number: ticket.number,
         field: ticket.rounds[this.roundIndex].field,
