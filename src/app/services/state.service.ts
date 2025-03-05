@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
 import {
+  IGame,
   IGameSettings,
   IRoundSettings,
+  IUser,
 } from '../models/models';
 import { environment } from '../../environments/environment';
 import { extractTimestamp, extractVideoId } from '../utils/utils';
 import { Subject } from 'rxjs';
+import { DEFAULT_BACKGROUND_MUSIC } from '../constants/constants';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,9 +17,16 @@ import { Subject } from 'rxjs';
 export class StateService {
   public showCards = false;
   public logo = 'weli';
-
+  gameCode = "";
+  user: IUser | null = null;
+  $init = new Subject<boolean>();
+  game: IGame | null = null;
 
   constructor() { }
+
+  setUser(user: IUser){
+    this.user = user;
+  }
 
 }
 

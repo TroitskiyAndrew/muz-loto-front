@@ -1,0 +1,23 @@
+<div class="dialog">
+  <div *ngIf="dialogData.title" class="dialog__title">{{dialogData.title}}</div>
+  <div *ngIf="dialogData.message" class="dialog__message">{{dialogData.message}}</div>
+  <div *ngIf="dialogData.template" class="dialog__template">
+    <ng-container *ngTemplateOutlet="dialogData.template"></ng-container>
+  </div>
+  <div *ngIf="errorMessage" class="dialog__message-error">{{errorMessage}}</div>
+  <div *ngIf="dialogData.fields" class="dialog__form">
+    <div *ngFor="let field of dialogData.fields" class="dialog__control">
+      <label [for]="field.id">{{field.label}}</label>
+      <input [id]="field.id" [formControl]="field.control">
+    </div>
+  </div>
+  <div *ngIf="dialogData.buttons" class="dialog__buttons">
+    <button
+      *ngFor="let button of dialogData.buttons"
+      [ngClass]="['dialog__buttons__btn', 'button', button.disabled() ? 'disabled' : '', button.class || '']"
+      (click)="runAction(button)"
+      [disabled]="button.disabled()">
+      {{button.label}}
+    </button>
+  </div>
+</div>

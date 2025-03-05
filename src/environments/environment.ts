@@ -3,6 +3,6 @@ export const environment = {
   playerDelay: 5,
   videoStep: 5,
   videoStepDuration: 100,
-  cardsCount: 60,
   backgroundVolume: 30,
+  backendUrl: 'http://localhost:3000'
 };

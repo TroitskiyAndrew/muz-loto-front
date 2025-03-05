@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import {
   IGameSettings,
-  NEW_IGame,
-  NEW_IPlayingRound,
-  NEW_IPlayingTicketRound,
-  NEW_IRoundSong,
-  NEW_ITicket,
+  IGame,
+  IPlayingTicket,
+  IRound,
+  IRoundSong,
+  ITicket,
+  SocketMessageType,
+  TicketsMessagePayload,
   Weight,
   Winner,
 } from '../../models/models';
@@ -15,6 +17,9 @@ import { StateService } from '../../services/state.service';
 import { CreatorService } from '../../services/creator.service';
 import { getRandomElem } from '../../utils/utils';
 import { ModalService } from '../../services/modal.service';
+import { SocketService } from '../../services/socket.service';
+import { DialogService } from '../../services/dialog.service';
+import { FormControl, Validators } from '@angular/forms';
 
 const DEEP = 0;
 
@@ -29,7 +34,7 @@ const WIN_NAMING = {
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
 })
-export class GameComponent {
+export class GameComponent implements OnDestroy{
   public isGameStarted = false;
   public showName = false;
   wantedWinner: Winner | null = Winner.Line;
@@ -39,17 +44,16 @@ export class GameComponent {
   deep = DEEP;
   boost = 1000;
   errors = 0;
-  winnersNumbers: number[] = [];
+  gameWinners: number[] = [];
   wastedTickets:  number[] = [];
-  new_game!: NEW_IGame;
-  new_tickets!: NEW_ITicket[];
-  new_currentRound: NEW_IPlayingRound | null = null;
-  new_currentRoundTickets: NEW_IPlayingTicketRound[] = [];
-  new_selectedSong: NEW_IRoundSong | null = null;
+  game!: IGame;
+  currentRound!: IRound;
+  currentRoundTickets: IPlayingTicket[] = [];
+  selectedSong: IRoundSong | null = null;
   playedSongs: string[] = [];
   roundIndex = 0;
-  new_winners: Set<number> = new Set();
-  new_simulation = false;
+  currentWinners: Set<number> = new Set();
+  simulation = false;
 
 
   constructor(
@@ -57,14 +61,35 @@ export class GameComponent {
     public stateService: StateService,
     private creatorService: CreatorService,
     private modalService: ModalService,
+    private socketService: SocketService,
+    private dialogService: DialogService,
   ) {
     // this.simulateGames(50);
+    this.playerService.gameMode = true;
+    this.playerService.playBackGround();
+    this.socketService.onMessage<boolean | null>(SocketMessageType.Player, ({data}) => {
+      if(data === true){
+        this.nextSong();
+      } else if(data === false){
+        this.playerService.stop();
+      }
+    });
+    this.socketService.onMessage<TicketsMessagePayload>(SocketMessageType.Tickets, ({data}) => {
+      if(data.add){
+        this.wastedTickets = Array.from(new Set([...this.wastedTickets, ...data.tickets]))
+      } else {
+        this.wastedTickets = this.wastedTickets.filter(ticket => !data.tickets.includes(ticket))
+      }
+    });
+    this.game = this.stateService.game!;
   }
 
   startGame() {
-    this.isGameStarted = true;
-    this.new_game = this.creatorService.generateGame();
-    this.new_tickets = this.creatorService.generateTickets(this.new_game);
+    if(this.roundIndex){
+      this.prepareRound();
+      return;
+    }
+    // this.game = this.creatorService.generateGame();
     this.playNewGame();
     // this.simulateGames(10)
   }
@@ -77,12 +102,11 @@ export class GameComponent {
   }
 
   simulateNewGame() {
-    this.new_game = this.creatorService.generateGame();
-    this.new_tickets = this.creatorService.generateTickets(this.new_game);
-    this.winnersNumbers = [];
-    this.wastedTickets = this.new_tickets.map(ticket => ticket.number).filter(number => number > 10);
+    // this.game = this.creatorService.generateGame();
+    this.gameWinners = [];
+    this.wastedTickets = this.game.tickets.map(ticket => ticket.number).filter(number => number > 10);
 
-    for (let i = 0; i < this.new_game.rounds.length; i++) {
+    for (let i = 0; i < this.game.rounds.length; i++) {
       this.roundIndex = i;
       this.simulateRound();
     }
@@ -90,7 +114,7 @@ export class GameComponent {
 
   simulateRound() {
     this.prepareRound();
-    console.log('players ', this.new_currentRoundTickets.length -  this.wastedTickets.length);
+    console.log('players ', this.currentRoundTickets.length -  this.wastedTickets.length);
     this.simulateStep();
   }
 
@@ -99,13 +123,13 @@ export class GameComponent {
     this.currentStep++;
     this.deep = DEEP + Math.floor(this.currentStep / 10);
     const selectedSongId = this.selectSong();
-    this.new_winners = this.getWinners(selectedSongId);
+    this.currentWinners = this.getWinners(selectedSongId);
     this.playedSongs.push(selectedSongId);
 
-    if (this.wantedWinner && this.new_winners.size > (this.new_currentRound?.[this.wantedWinner].count || 99)) {
+    if (this.wantedWinner && this.currentWinners.size > (this.currentRound[this.wantedWinner].count || 99)) {
       this.errors++
     }
-    if(this.new_winners.size){
+    if(this.currentWinners.size){
       this.submitWin();
     }
     if(this.playedSongs.length < this.roundSongs.length){
@@ -114,7 +138,7 @@ export class GameComponent {
   }
 
   playNewGame(){
-    this.winnersNumbers = [];
+    this.gameWinners = [];
     this.wastedTickets = [];
     this.roundIndex = 0;
     this.prepareRound();
@@ -125,53 +149,38 @@ export class GameComponent {
     this.playedSongs = [];
     this.currentStep = 0;
     this.wantedWinner = Winner.Line;
-    this.new_currentRound = {
-      ...this.new_game.rounds[this.roundIndex],
-      [Winner.Line]: {
-        count: 1,
-        tickets: [],
-        from: 12,
-        to: 16,
-      },
-      [Winner.Cross]: {
-        count: 1,
-        tickets: [],
-        from: 20,
-        to: 25,
-      },
-      [Winner.All]: {
-        count: 1,
-        tickets: [],
-        from: 33,
-        to: 39,
-      }
-    };
-    this.new_currentRoundTickets = this.new_tickets.map((ticket) => {
+    this.currentRound = this.game.rounds[this.roundIndex];
+    this.currentRoundTickets = this.game.tickets.map((ticket) => {
       return {
         number: ticket.number,
         field: ticket.rounds[this.roundIndex].field,
       }
     });
-
+    this.isGameStarted = true;
   }
 
   handleClick(event: Event){
     event?.stopImmediatePropagation();
+    this.nextSong();
+  }
+
+  nextSong() {
     if (!this.playerService.$init.value) {
       return;
     }
     if (this.playedSongs.length === this.roundSongs.length){
+      this.isGameStarted = false;
       this.roundIndex++;
-      this.prepareRound();
+      return;
     }
     this.handleStart();
   }
 
   handleStop(){
     this.showName = true;
-    this.new_selectedSong!.played = true;
-    if (this.new_winners.size ) {
-      this.askWinner(this.new_winners);
+    this.selectedSong!.played = true;
+    if (this.currentWinners.size ) {
+      this.askWinner(this.currentWinners);
     }
   }
 
@@ -179,36 +188,36 @@ export class GameComponent {
     this.showName = false;
     this.currentStep++;
     this.deep = DEEP + Math.floor(this.currentStep / 10);
-    this.new_selectedSong = null;
-    const availableSongs = this.roundSongs.filter(song => !this.playedSongs.includes(song.id)).sort(() => Math.random() - 0.5);
+    this.selectedSong = null;
+    const availableSongs = this.roundSongs.filter(song => !this.playedSongs.includes(song.youtubeId)).sort(() => Math.random() - 0.5);
     let randomizerIndex = 0;
     const randomizerInterval = setInterval(() => {
       this.roundSongs.forEach((song) => (song.class = ''));
       availableSongs[randomizerIndex++ % availableSongs.length].class = 'blue';
-    }, this.new_simulation ? 0 : 250);
+    }, this.simulation ? 0 : 250);
 
     const selectedSongId = this.selectSong();
-    this.new_selectedSong = this.roundSongs.find(song => song.id === selectedSongId)!;
-    const playPromise = this.new_simulation ? Promise.resolve() : this.playerService.play(this.new_selectedSong);
+    this.selectedSong = this.roundSongs.find(song => song.youtubeId === selectedSongId)!;
+    const playPromise = this.simulation ? Promise.resolve() : this.playerService.play(this.selectedSong);
     playPromise.then(this.handleStop.bind(this));
 
     setTimeout(() => {
       clearInterval(randomizerInterval);
       this.roundSongs.forEach((song) => (song.class = ''));
-      this.new_selectedSong!.class = 'green';
-    }, this.new_simulation ? 0 : environment.playerDelay * 1000 - 500);
-    this.new_winners = this.getWinners(selectedSongId);
+      this.selectedSong!.class = 'green';
+    }, this.simulation ? 0 : environment.playerDelay * 1000 - 500);
+    this.currentWinners = this.getWinners(selectedSongId);
     this.playedSongs.push(selectedSongId);
   }
 
 
 
   get playingTickets () {
-    return this.new_currentRoundTickets.filter(ticket => !this.wastedTickets.includes(ticket.number));
+    return this.currentRoundTickets.filter(ticket => !this.wastedTickets.includes(ticket.number));
   }
 
   get roundSongs() {
-    return this.new_currentRound?.field.flat() || [];
+    return this.currentRound.field.flat();
   }
 
   selectSong(): string{
@@ -229,7 +238,7 @@ export class GameComponent {
 
   getWeights(): Weight[] {
     const weights = [];
-    const songs = this.new_currentRound!.field.flat().map(song => song.id).filter(songId => !this.playedSongs.includes(songId)).sort(() => Math.random() - 0.5);
+    const songs = this.currentRound.field.flat().map(song => song.youtubeId).filter(songId => !this.playedSongs.includes(songId)).sort(() => Math.random() - 0.5);
     for (const songId of songs) {
       const weight = this.getWeightsForSong(songId, songs, this.playedSongs);
       weights.push({ songId, weight })
@@ -245,9 +254,9 @@ export class GameComponent {
     if ( !songs.length) {
       return -this.boost;
     }
-    const winners = this.getWinners(songId, playedSongs);
+    const currentWinners = this.getWinners(songId, playedSongs);
     const step = this.currentStep + (DEEP - this.deep)
-    const weight = this.getResultWeight(winners, step);
+    const weight = this.getResultWeight(currentWinners, step);
     if(weight != null){
       return weight;
     }
@@ -263,8 +272,8 @@ export class GameComponent {
     return success / songs.length;
   }
 
-  askWinner(winners: Set<number>){
-    const winnerQuestion = `Билет${winners.size > 1 ? 'ы' : ''} #${Array.from(winners).join(', ')} собрал${winners.size > 1 ? 'и' : ''} ${WIN_NAMING[this.wantedWinner!]}. Билет в игре?`;
+  askWinner(currentWinners: Set<number>){
+    const winnerQuestion = `Билет${currentWinners.size > 1 ? 'ы' : ''} #${Array.from(currentWinners).join(', ')} собрал${currentWinners.size > 1 ? 'и' : ''} ${WIN_NAMING[this.wantedWinner!]}. Билет в игре?`;
     this.modalService.openModal(winnerQuestion).then(answer => {
       if(answer){
         this.submitWin();
@@ -273,18 +282,18 @@ export class GameComponent {
   }
 
   submitWin(){
-    console.log(`Билеты № ${Array.from(this.new_winners)} выиграли ${WIN_NAMING[this.wantedWinner!]} в ${this.new_currentRound!.name} на ${this.currentStep} ходу`);
+    console.log(`Билеты № ${Array.from(this.currentWinners)} выиграли ${WIN_NAMING[this.wantedWinner!]} в ${this.currentRound.name} на ${this.currentStep} ходу`);
     this.wantedWinner = this.wantedWinner === Winner.Line ? Winner.Cross : this.wantedWinner === Winner.Cross ? Winner.All : null;
-    this.winnersNumbers.push(...Array.from(this.new_winners));
+    this.gameWinners.push(...Array.from(this.currentWinners));
   }
 
-  getResultWeight(winners: Set<number>, step: number): number | null {
-    const winnersArray = Array.from(winners);
-    const { count, tickets } = this.new_currentRound![this.wantedWinner!];
-    if (winnersArray.length > count || winnersArray.some(winner => this.winnersNumbers.includes(winner))) {
+  getResultWeight(currentWinners: Set<number>, step: number): number | null {
+    const winnersArray = Array.from(currentWinners);
+    const { count, tickets } = this.currentRound[this.wantedWinner!];
+    if (winnersArray.length > count || winnersArray.some(winner => this.gameWinners.includes(winner))) {
       return -this.boost * 10;
     }
-    // if (winners.length > count) {
+    // if (currentWinners.length > count) {
     //   return -this.boost * 1000;
     // }
     if(tickets.length && winnersArray.length === count && winnersArray.every(winner => tickets.includes(winner))){
@@ -300,13 +309,13 @@ export class GameComponent {
     return null
   }
 
-  trySongInTicket(songId: string, ticket: NEW_IPlayingTicketRound, playedSongs: string[]): boolean {
+  trySongInTicket(songId: string, ticket: IPlayingTicket, playedSongs: string[]): boolean {
     let result = false;
     const linesSimulation = ticket.field.map(
-      (row) => new Set(row.filter(song => !playedSongs.includes(song.id)).map((song) => song.id))
+      (row) => new Set(row.filter(song => !playedSongs.includes(song.youtubeId)).map((song) => song.youtubeId))
     );
     for (let columnIndex = 0; columnIndex < ticket.field.length; columnIndex++) {
-      linesSimulation.push(new Set(ticket.field.filter(row => !playedSongs.includes(row[columnIndex].id)).map((row) => row[columnIndex].id)));
+      linesSimulation.push(new Set(ticket.field.filter(row => !playedSongs.includes(row[columnIndex].youtubeId)).map((row) => row[columnIndex].youtubeId)));
     }
     const horizontalLines = linesSimulation.slice(0, linesSimulation.length / 2);
     const verticalLines = linesSimulation.slice(linesSimulation.length / 2);
@@ -341,40 +350,14 @@ export class GameComponent {
       start: 0,
       played: false,
       class: '',
-      id: 'Hy8kmNEo1i8',
+      youtubeId: 'Hy8kmNEo1i8',
     };
 
     // this.playerService.$video.next(video);
   }
 
+  ngOnDestroy(): void {
+    this.playerService.gameMode = false;
+  }
 
 }
-
-const settings: IGameSettings = {
-  doubleWin: false,
-  logo: 'weli',
-  rounds: [
-    {
-      roundFieldColumns: 7,
-      roundFieldRows: 6,
-      playerFieldColumns: 5,
-      playerFieldRows: 5,
-      lineWinners: 1,
-      crossWinners: 1,
-      allWinners: 1,
-      doubleWin: false,
-      notRusSongs: 6,
-    },
-    {
-      roundFieldColumns: 7,
-      roundFieldRows: 6,
-      playerFieldColumns: 5,
-      playerFieldRows: 5,
-      lineWinners: 1,
-      crossWinners: 1,
-      allWinners: 1,
-      doubleWin: false,
-      notRusSongs: 6,
-    },
-  ],
-};

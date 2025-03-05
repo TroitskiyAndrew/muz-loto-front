@@ -1,53 +1,80 @@
+import { TemplateRef } from "@angular/core";
+import { FormControl } from "@angular/forms";
+
 export interface IGameSettings {
-  doubleWin: boolean;
-  logo: string;
+  tickets: number;
+  backgroundMusic: IBackgroundMusic;
   rounds: IRoundSettings[];
+}
+
+export interface IBackgroundMusic {
+  youtubeId: string;
+  start: number;
 }
 
 export interface IRoundSettings {
   roundFieldColumns: number;
   roundFieldRows: number;
-  playerFieldColumns: number;
-  playerFieldRows: number;
+  ticketFieldColumns: number;
+  ticketFieldRows: number;
   lineWinners: number;
   crossWinners: number;
   allWinners: number;
-  doubleWin: boolean;
   notRusSongs: number,
 }
 
 export interface ISong {
+  id: string;
   artist: string,
   name: string;
   rus: boolean;
-  id: string;
+  youtubeId: string;
   start: number;
+  games: string[];
 }
+
+export type INewSong  = Omit<ISong, 'id'>
 
 export type ISongWithSettings = ISong & {
   priority: boolean;
   disabled: boolean;
+  round: number | undefined
 }
 
-export type NEW_IRoundSong = ISong & {
+export type IRoundSong = ISong & {
   number: number;
   class: string;
   played: boolean;
 }
 
 
-export interface NEW_IGame {
+export interface IGame {
   id: string;
-  rounds: NEW_IRound[]
+  code: string;
+  owner: string;
+  tickets: ITicket[]
+  rounds: IRound[];
+  results: IGameResults;
+  backgroundMusic: IBackgroundMusic;
 }
 
-export interface NEW_IRound {
+export type INewGame  = Omit<IGame, 'id'>
+
+export interface IGameResults {
+  lastStart: string | null;
+  currentWinners: number[];
+  wastedTickets: number[];
+  rounds: IRoundResults[];
+}
+
+export interface IRoundResults {
+  gameWinners: number[],
+  playedSongs: string[],
+}
+
+export interface IRound {
   name: string;
-  field: NEW_IRoundSong[][]
-}
-
-export type NEW_IPlayingRound = NEW_IRound & {
-  //ToDo брать из настроек
+  field: IRoundSong[][];
   [Winner.Line]: IWinnersSettings;
   [Winner.Cross]: IWinnersSettings;
   [Winner.All]: IWinnersSettings;
@@ -59,36 +86,24 @@ export interface IWinnersSettings {
   from: number;
   to: number;
 }
-export interface NEW_IGameSettings {
-  rounds: NEW_IRoundSettings[];
-}
 
-export interface NEW_IRoundSettings {
-  roundFieldColumns: number,
-  roundFieldRows: number,
-  notRusSongs: number,
-}
 
-export interface NEW_ITicketsSettings {
-  count: number,
-  rounds: NEW_IRoundTicketsSettings[],
-}
-
-export interface NEW_IRoundTicketsSettings {
-  ticketFieldColumns: number,
-  ticketFieldRows: number,
-}
-
-export interface NEW_ITicket {
+export interface ITicket {
   number: number;
-  rounds: NEW_ITicketRound[];
+  rounds: ITicketRound[];
 }
 
-export interface NEW_ITicketRound {
-  field: NEW_IRoundSong[][];
+export interface ITicketRound {
+  field: IRoundSong[][];
 }
 
-export type NEW_IPlayingTicketRound = Pick<NEW_ITicket, 'number'> & NEW_ITicketRound;
+export type IPlayingTicket = Pick<ITicket, 'number'> & ITicketRound;
+
+
+export interface Weight {
+  songId: string;
+  weight: number;
+}
 
 export enum Winner {
   Line,
@@ -96,7 +111,69 @@ export enum Winner {
   All,
 }
 
-export interface Weight {
-  songId: string;
-  weight: number;
+export enum SocketMessageType {
+  Player = 'playerMessage',
+  Modal = 'modalMessage',
+  Game = 'gameMessage',
+  Tickets = 'ticketsMessage',
 }
+
+export interface SocketMessage<T> {
+  type: SocketMessageType;
+  gameCode: string;
+  data: T;
+}
+
+export interface TicketsMessagePayload {
+  add: boolean,
+  tickets: number[];
+}
+
+export type SocketCallback<T> = (data: SocketMessage<T>) => void
+
+export type Callbacks = {
+  [key in SocketMessageType]: SocketCallback<any>
+}
+
+export interface ICredentials {
+  email: string;
+  hashedPassword: string;
+}
+export interface IUser {
+  id: string;
+  email: string;
+  logo: string;
+  gamesCredit: number;
+  backgroundMusic: IBackgroundMusic;
+}
+
+export type INewUser  = Omit<IUser, 'id'> & {hashedPassword: string}
+
+export interface IAuthResponse {
+  user: IUser;
+  token: string;
+}
+
+export interface IDialogField {
+  id: string;
+  label: string;
+  control: FormControl
+}
+
+export interface IDialogButton {
+  label: string;
+  action: () => Promise<any> | any;
+  disabled: () => boolean;
+  class?: string
+}
+
+export interface DialogData {
+  init?: () => void;
+  title?: string;
+  message?: string;
+  errorMessage?: string;
+  fields?: IDialogField[];
+  buttons: IDialogButton[];
+  template?: TemplateRef<any>;
+}
+

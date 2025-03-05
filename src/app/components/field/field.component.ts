@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { NEW_IRound, NEW_IRoundSong } from '../../models/models';
+import { IRound, IRoundSong } from '../../models/models';
 
 @Component({
   selector: 'app-field',
@@ -7,8 +7,8 @@ import { NEW_IRound, NEW_IRoundSong } from '../../models/models';
   styleUrl: './field.component.scss'
 })
 export class FieldComponent {
-  @Input() round!: NEW_IRound;
-  rows: NEW_IRoundSong[][] = [];
+  @Input() round!: IRound;
+  rows: IRoundSong[][] = [];
 
   constructor(){
 

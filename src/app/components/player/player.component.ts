@@ -18,7 +18,6 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
   private backgroundPlayer: any;
   sub!: Subscription;
   iframe: any;
-  isPlaying = false;
   switching = false;
   block = false;
 
@@ -93,15 +92,18 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
       },
       events: {
         onReady: () => {
-          this.backgroundPlayer.setVolume(0);
-          this.backgroundPlayer.seekTo(930, true);
-          // const iframe = document.querySelector('.background-player > iframe') as HTMLIFrameElement;
-          this.increaseVolume(false, false);
-          this.backgroundPlayer.playVideo();
+          this.sub = this.playerService.$playBackGround.subscribe((backgroundMusic) => {
+            this.playerService.backgroundMusic = backgroundMusic;
+            this.player.loadVideoById(backgroundMusic.youtubeId);
+            this.backgroundPlayer.setVolume(0);
+            this.backgroundPlayer.seekTo(backgroundMusic.start, true);
+            this.increaseVolume(false, false);
+            this.backgroundPlayer.playVideo();
+          });
         },
         onStateChange: (event: any) => {
           if (event.data === 0){
-            this.backgroundPlayer.seekTo(930, true);
+            this.backgroundPlayer.seekTo(this.playerService.backgroundMusic.start, true);
           }
         },
       }
@@ -112,26 +114,27 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
   private play(video: ISong) {
     this.block = true;
     (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex = '100';
-    const {id , start}  = video;
-    this.player.loadVideoById(id);
+    const {youtubeId , start}  = video;
+    this.player.loadVideoById(youtubeId);
     this.player.playVideo();
     setTimeout(() => {
       this.block = false;
-    }, environment.playerDelay * 1000 + 2000);
+    }, this.playerService.gameMode ? (environment.playerDelay * 1000 + 2000) : 1000);
     setTimeout(() => {
       this.player.seekTo(start, true);
 
       this.increaseVolume(true, true);
       this.increaseVisibility();
-    }, environment.playerDelay * 1000);
+    }, this.playerService.gameMode ? (environment.playerDelay * 1000) : 500 );
   }
 
   stop(){
-    (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex = '-100';
-    this.decreaseVolume(true, true);
+
+    this.decreaseVolume(true, this.playerService.gameMode);
     this.decreaseVisibility();
     setTimeout(() => {
       this.renderer.setStyle(this.el.nativeElement, 'opacity', '0');
+      (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex = '-100';
       this.player.stopVideo();
     }, (100/environment.videoStep) * environment.videoStepDuration)
   }
