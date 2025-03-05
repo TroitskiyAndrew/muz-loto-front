@@ -4,5 +4,5 @@ export const environment = {
   videoStep: 5,
   videoStepDuration: 100,
   backgroundVolume: 30,
-  backendUrl: 'muz-loto-back-oc4ewvata-troitskiyandrews-projects.vercel.app:3000'
+  backendUrl: 'muz-loto-back-e9iws9yom-troitskiyandrews-projects.vercel.app:3000'
 };
