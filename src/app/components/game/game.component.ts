@@ -93,17 +93,22 @@ export class GameComponent implements OnDestroy{
         {
           label: 'Выход',
           disabled: () => false,
-          action: () => this.router.navigate(['']),
+          action: () => null,
           class: 'cancel'
         }
         ]
       })
+      if(code === null){
+        this.router.navigate([''])
+        return;
+      }
     }
     this.loadingService.show()
     const game = await this.apiService.getGame(code);
     this.loadingService.hide()
     if(game == null){
       this.router.navigate([''])
+      return;
     }
     this.game = game!;
     this.stateService.gameCode = this.game.code;
