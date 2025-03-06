@@ -1,8 +1,7 @@
 :host {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  overflow-y: scroll;
+  padding-top: 20px;
 }
 
 .songs {
@@ -43,4 +42,10 @@ input.ng-invalid {
 form {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  row-gap: 10px;
+}
+
+.create-button {
+  width: max-content;
 }

@@ -20,12 +20,17 @@ export class SocketService {
     });
   }
 
-  sendMessage<T>(message: SocketMessage<T>) {
-    this.socket.emit('messageToBack', message);
+  sendMessage<T>(message: Omit<SocketMessage<T>, 'gameCode'>) {
+    this.socket.emit('messageToBack', {...message, gameCode: this.stateService.gameCode});
   }
 
   onMessage<T>(type: SocketMessageType, callback: SocketCallback<T>) {
     this.callbacks[type] = callback;
+    this.callbacks[type] = (data:SocketMessage<T>) => {
+      if(data.gameCode === this.stateService.gameCode){
+        return callback(data)
+      }
+    };
   }
 
   disconnect() {
@@ -33,31 +38,31 @@ export class SocketService {
   }
 
   nextSong() {
-    this.sendMessage({ type: SocketMessageType.Player, gameCode: this.stateService.gameCode, data: true });
+    this.sendMessage({ type: SocketMessageType.Player, data: true });
   }
 
   stopSong() {
-    this.sendMessage({ type: SocketMessageType.Player, gameCode: this.stateService.gameCode, data: false });
+    this.sendMessage({ type: SocketMessageType.Player,  data: false });
   }
 
   returnSong() {
-    this.sendMessage({ type: SocketMessageType.Player, gameCode: this.stateService.gameCode, data: null });
+    this.sendMessage({ type: SocketMessageType.Player,  data: null });
   }
 
   modalAnswer(answer: boolean) {
-    this.sendMessage({ type: SocketMessageType.Modal, gameCode: this.stateService.gameCode, data: answer });
+    this.sendMessage({ type: SocketMessageType.Modal,  data: answer });
   }
 
   startGame() {
-    this.sendMessage({ type: SocketMessageType.Game, gameCode: this.stateService.gameCode, data: true });
+    this.sendMessage({ type: SocketMessageType.Game,  data: true });
   }
 
   addTickets(tickets: number[]) {
-    this.sendMessage<TicketsMessagePayload>({ type: SocketMessageType.Tickets, gameCode: this.stateService.gameCode, data: { add: true, tickets } });
+    this.sendMessage<TicketsMessagePayload>({ type: SocketMessageType.Tickets,  data: { add: true, tickets } });
   }
 
   excludeTickets(tickets: number[]) {
-    this.sendMessage<TicketsMessagePayload>({ type: SocketMessageType.Tickets, gameCode: this.stateService.gameCode, data: { add: true, tickets } });
+    this.sendMessage<TicketsMessagePayload>({ type: SocketMessageType.Tickets,  data: { add: true, tickets } });
   }
 
 }

@@ -98,43 +98,7 @@
   background-color: #f4f4f4; /* Светлый фон для заголовков */
 }
 
-.player-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 42px;
-  font-size: 14px;
-  div {
-    width: 100%;
-    text-align: center;
-  }
 
-}
-
-
-.player-section {
-  // page-break-after: always;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  row-gap: 50px;
-  border-bottom: 1px solid;
-  border-top: 1px solid;
-  padding: 15px 5px;
-  height: 340px;
-  &__round {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    row-gap: 10px;
-
-
-  }
-}
 
 /* Убедитесь, что разрыв страницы работает только для печати */
 @media print {

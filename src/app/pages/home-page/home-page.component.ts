@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { StateService } from '../../services/state.service';
 import { ApiService } from '../../services/api.service';
 import { DialogService } from '../../services/dialog.service';
@@ -13,9 +13,11 @@ import { Router } from '@angular/router';
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss'
 })
-export class HomePageComponent {
+export class HomePageComponent implements OnDestroy{
 
-  constructor(public authService: AuthService, public stateService: StateService, private router: Router) { }
+  constructor(public authService: AuthService, public stateService: StateService, private router: Router) {
+    this.stateService.showHome = true;
+  }
 
   login() {
     this.authService.login();
@@ -35,6 +37,14 @@ export class HomePageComponent {
 
   createGame(){
     this.router.navigate(['createGame']);
+  }
+
+  myGames(){
+    this.router.navigate(['myGames']);
+  }
+
+  ngOnDestroy(): void {
+    this.stateService.showHome = false;
   }
 
 }

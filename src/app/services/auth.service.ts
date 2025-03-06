@@ -82,7 +82,6 @@ export class AuthService {
     }
 
     private handleAuthResponse (res: IAuthResponse | null) {
-      console.log(res)
       if(!res){
         return;
       }

@@ -20,7 +20,7 @@
 }
 
 .button {
-  background-color: $color-contrast;
+  background-color: green;
   color: white;
   font-size: 18px;
   font-weight: 500;
@@ -36,4 +36,15 @@
   &.cancel {
     background-color: rgb(236, 86, 86)
   }
+}
+
+
+button.green {
+  background-color: #6fd76f !important;
+}
+button.yellow {
+  background-color: #f7f70d !important;
+}
+button.red {
+  background-color: red !important;
 }

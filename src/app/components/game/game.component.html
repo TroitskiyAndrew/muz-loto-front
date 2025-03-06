@@ -1,4 +1,4 @@
-<div class="game" [ngClass]="stateService.showCards ? 'cards' : ''">
+<div class="game" *ngIf="$init | async" [ngClass]="stateService.showCards ? 'cards' : ''">
   <ng-container *ngIf="!stateService.showCards">
     <div *ngIf="!isGameStarted" class="game__start" (click)="startGame()">
       <img src="assets/logo.png" alt="">
@@ -16,34 +16,5 @@
       </div>
     </div>
   </ng-container>
-
-
-  <ng-container *ngIf="stateService.showCards">
-    <div *ngFor="let ticket of currentRoundTickets" class="player-section player">
-      <!-- <div *ngFor="let round of game.rounds; let roundIndex = index;" class="player-section__round"> -->
-      <div class="player-section__round">
-        <div class="ticket-head">
-          <div class="ticket-head__name">Билет №{{ticket.number}}</div>
-          <div class="ticket-head__name">{{game.rounds[roundIndex].name}}</div>
-          <img class="ticket-head__logo" [src]="'assets/' + stateService.logo + '.png'" alt="">
-        </div>
-        <table class="table-bordered">
-          <tbody>
-            <tr *ngFor="let row of ticket.field">
-              <td *ngFor="let cell of row">
-                <div class="player-cell">
-                  <div>{{ cell.name }}</div>
-                  <div>{{ cell.artist }}</div>
-
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </ng-container>
-
-  <!-- <div *ngIf="isGameStarted"  class="game__next-round" (click)="showExample()"> Пример </div> -->
 </div>
 <img class="logo" [src]="'assets/' + stateService.logo + '.png'" alt="">

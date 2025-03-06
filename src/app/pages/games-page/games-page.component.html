@@ -1,0 +1,76 @@
+<div class="games">
+  <div *ngFor="let game of games" class="game">
+    <div class="game__info">
+      <div class="game__info__item">
+        <div class="game__info__label">Код</div>
+        <div class="game__info__value">{{ game.code }}</div>
+      </div>
+      <div class="game__info__item">
+        <div class="game__info__label">Последний запуск</div>
+        <div class="game__info__value">{{ game.results.lastStart || '-------------' }}</div>
+      </div>
+      <div class="game__info__item">
+        <div class="game__info__label">Билеты</div>
+        <div class="game__info__value">{{ game.ticketsCount }}</div>
+      </div>
+    </div>
+    <div class="game__actions">
+      <button color="primary" mat-raised-button class="tickets__print" (click)="printTickets(game.id)">Печать билетов</button>
+      <button color="accent" mat-raised-button class="tickets__run" (click)="runGame(game.code)">Запустить игру</button>
+    </div>
+  </div>
+
+</div>
+
+<ng-container *ngIf="showTickets">
+  <div class="tickets">
+    <div class="front">
+      <div *ngFor="let ticket of tickets" class="player-section player">
+        <div class="player-section__round">
+          <div class="ticket-head">
+            <div class="ticket-head__name">Билет №{{ticket.number}}</div>
+            <div class="ticket-head__name">{{roundNames[0]}}</div>
+            <img class="ticket-head__logo" [src]="'assets/' + stateService.logo + '.png'" alt="">
+          </div>
+          <table class="table-bordered">
+            <tbody>
+              <tr *ngFor="let row of ticket.rounds[0].field">
+                <td *ngFor="let cell of row">
+                  <div class="player-cell">
+                    <div>{{ cell.artist }}</div>
+                    <div>{{ cell.name.length > 15 ? cell.name.slice(0,15) + "..." : cell.name }}</div>
+
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div *ngFor="let ticket of tickets" class="player-section player">
+        <div class="player-section__round">
+          <div class="ticket-head">
+            <div class="ticket-head__name">Билет №{{ticket.number}}</div>
+            <div class="ticket-head__name">{{roundNames[1]}}</div>
+            <img class="ticket-head__logo" [src]="'assets/' + stateService.logo + '.png'" alt="">
+          </div>
+          <table class="table-bordered">
+            <tbody>
+              <tr *ngFor="let row of ticket.rounds[0].field">
+                <td *ngFor="let cell of row">
+                  <div class="player-cell">
+                    <div>{{ cell.artist }}</div>
+                    <div>{{ cell.name }}</div>
+
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>

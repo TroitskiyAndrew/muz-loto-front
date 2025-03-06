@@ -20,6 +20,10 @@ import { ModalService } from '../../services/modal.service';
 import { SocketService } from '../../services/socket.service';
 import { DialogService } from '../../services/dialog.service';
 import { FormControl, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { LoadingService } from '../../services/loading.service';
+import { ApiService } from '../../services/api.service';
 
 const DEEP = 0;
 
@@ -55,6 +59,7 @@ export class GameComponent implements OnDestroy{
   currentWinners: Set<number> = new Set();
   simulation = false;
   tickets: ITicket[] = [];
+  $init = new Subject<boolean>();
 
 
   constructor(
@@ -64,8 +69,45 @@ export class GameComponent implements OnDestroy{
     private modalService: ModalService,
     private socketService: SocketService,
     private dialogService: DialogService,
+    private route: ActivatedRoute,
+    private loadingService: LoadingService,
+    private apiService: ApiService,
+    private router: Router
   ) {
-    // this.simulateGames(50);
+    this.init()
+  }
+
+  async init(){
+    this.stateService.showHome = false;
+    let code = this.route.snapshot.params['code'];
+    if(!code){
+      const codeField = { id: 'code', label: '', control: new FormControl('', [Validators.required]) };
+      code = await this.dialogService.init({
+        message: 'введите код игры',
+        fields: [codeField],
+        buttons: [{
+          label: 'Ок',
+          disabled: () => codeField.control.invalid,
+          action: async () => codeField.control.value as string,
+        },
+        {
+          label: 'Выход',
+          disabled: () => false,
+          action: () => this.router.navigate(['']),
+          class: 'cancel'
+        }
+        ]
+      })
+    }
+    this.loadingService.show()
+    const game = await this.apiService.getGame(code);
+    this.loadingService.hide()
+    if(game == null){
+      this.router.navigate([''])
+    }
+    this.game = game!;
+    this.stateService.gameCode = this.game.code;
+    this.tickets = this.stateService.ticketsHolder[this.game.id]
     this.playerService.gameMode = true;
     this.playerService.playBackGround();
     this.socketService.onMessage<boolean | null>(SocketMessageType.Player, ({data}) => {
@@ -82,7 +124,7 @@ export class GameComponent implements OnDestroy{
         this.wastedTickets = this.wastedTickets.filter(ticket => !data.tickets.includes(ticket))
       }
     });
-
+    this.$init.next(true)
   }
 
   startGame() {
@@ -359,6 +401,7 @@ export class GameComponent implements OnDestroy{
 
   ngOnDestroy(): void {
     this.playerService.gameMode = false;
+    this.stateService.showHome = true;
     this.playerService.stopBackGround();
   }
 

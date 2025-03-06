@@ -1,5 +1,5 @@
 <form [formGroup]="form" (ngSubmit)="createGame()">
-  <button color="accent" mat-raised-button type="submit" [disabled]="form.invalid">Создать игру</button>
+  <button class="create-button" color="accent" mat-raised-button type="submit" [disabled]="form.invalid">Создать игру</button>
   <div class="settings">
     <div class="settings__main">
       <label>
@@ -102,7 +102,7 @@
        </td>
     </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns" ></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
 

@@ -8,7 +8,7 @@
   <div *ngIf="dialogData.fields" class="dialog__form">
     <div *ngFor="let field of dialogData.fields" class="dialog__control">
       <label [for]="field.id">{{field.label}}</label>
-      <input [id]="field.id" [formControl]="field.control">
+      <input [type]="field.type ?? 'text'" [id]="field.id" [formControl]="field.control">
     </div>
   </div>
   <div *ngIf="dialogData.buttons" class="dialog__buttons">

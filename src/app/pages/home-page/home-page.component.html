@@ -1,7 +1,8 @@
 <div class="menu">
-  <button *ngIf="!stateService.user" color="accent" mat-raised-button class="menuItem" (click)="login()">Войти</button>
-  <button *ngIf="!stateService.user" color="accent" mat-raised-button  class="menuItem" (click)="signUp()">Регистрация</button>
-  <button *ngIf="stateService.user" color="accent" mat-raised-button class="menuItem" (click)="logout()">Выйти</button>
-  <button color="accent" mat-raised-button class="menuItem" (click)="runGame()">Запустить игру</button>
-  <button *ngIf="stateService.user" color="accent" mat-raised-button class="menuItem" (click)="createGame()">Создать игру</button>
+  <button *ngIf="!stateService.user" mat-raised-button class="menuItem green" (click)="login()">Вход</button>
+  <button *ngIf="!stateService.user" mat-raised-button  class="menuItem green" (click)="signUp()">Регистрация</button>
+  <button color="primary" mat-raised-button class="menuItem" (click)="runGame()">Запустить игру</button>
+  <button *ngIf="stateService.user" color="primary" mat-raised-button class="menuItem" (click)="createGame()">Создать игру</button>
+  <button *ngIf="stateService.user" color="primary" mat-raised-button class="menuItem" (click)="myGames()">Мои игры</button>
+  <button *ngIf="stateService.user" color="warn" mat-raised-button  class="menuItem" (click)="logout()">Выйти</button>
 </div>

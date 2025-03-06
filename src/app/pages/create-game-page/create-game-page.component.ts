@@ -79,7 +79,7 @@ export class CreateGamePageComponent {
           ],
           notRusSongs: [
             5,
-            [Validators.required, Validators.min(0), Validators.max(6)],
+            [Validators.required, Validators.min(0), Validators.max(7)],
           ],
         }),
         this.fb.group({
@@ -107,7 +107,7 @@ export class CreateGamePageComponent {
           ],
           notRusSongs: [
             5,
-            [Validators.required, Validators.min(0), Validators.max(6)],
+            [Validators.required, Validators.min(0), Validators.max(7)],
           ],
         }),
       ]),
@@ -176,6 +176,7 @@ export class CreateGamePageComponent {
   }
 
   async createGame() {
+    this.loadingService.show()
     const game = await this.creatorService.generateGame(
       this.songsWithSettings,
       this.form.getRawValue()
@@ -184,9 +185,10 @@ export class CreateGamePageComponent {
       game,
       this.form.getRawValue()
     );
+    this.loadingService.hide()
     this.stateService.ticketsHolder[game.id] = tickets;
     localStorage.setItem('ticketsHolder', JSON.stringify(this.stateService.ticketsHolder));
-    this.router.navigate(['/'])
+    // this.router.navigate(['/'])
   }
 
   playBackground() {

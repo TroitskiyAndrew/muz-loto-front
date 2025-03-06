@@ -54,6 +54,7 @@ export interface IGame {
   owner: string;
   rounds: IRound[];
   results: IGameResults;
+  ticketsCount: number;
   backgroundMusic: IBackgroundMusic;
 }
 
@@ -164,7 +165,8 @@ export interface IAuthResponse {
 export interface IDialogField {
   id: string;
   label: string;
-  control: FormControl
+  control: FormControl,
+  type?: HTMLInputElement['type'],
 }
 
 export interface IDialogButton {

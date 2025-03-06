@@ -1,0 +1,13 @@
+<div class="controls">
+  <button color="accent" mat-raised-button  (click)="nextSong()">Следующая песня</button>
+  <button  class="yellow" mat-raised-button   (click)="stopSong()">Остановить песню</button>
+  <button  color="primary" mat-raised-button   (click)="startGame()">Запустить раунд</button>
+  <div class="controls__group">
+    <button class="green" mat-raised-button  (click)="sendAnswer(true)">Есть победитель</button>
+    <button class="red" mat-raised-button  (click)="sendAnswer(false)">Нет победителя</button>
+  </div>
+  <div class="controls__group">
+    <button class="green" mat-raised-button  (click)="addTickets()">Вернуть билеты в игру</button>
+    <button class="red" mat-raised-button  (click)="excludeTickets()"> Билеты не играют</button>
+  </div>
+</div>

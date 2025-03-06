@@ -23,6 +23,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { GamesPageComponent } from './pages/games-page/games-page.component';
+import { RunPageComponent } from './pages/run-page/run-page.component';
 
 @NgModule({
   declarations: [
@@ -35,6 +37,8 @@ import { MatIconModule } from '@angular/material/icon';
     HomePageComponent,
     LoadingOverlayComponent,
     CreateGamePageComponent,
+    GamesPageComponent,
+    RunPageComponent,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
@@ -54,7 +58,7 @@ import { MatIconModule } from '@angular/material/icon';
     AppRoutingModule,
     MatSortModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
   ],
   bootstrap: [AppComponent]
 })

@@ -27,16 +27,19 @@ export class StateService {
   user: IUser | null = null;
   $init = new Subject<boolean>();
   ticketsHolder: TicketsHolder = {};
+  showHome = true;
 
   constructor() {
     const ticketsHolderString = localStorage.getItem('ticketsHolder');
     if(ticketsHolderString){
       this.ticketsHolder = JSON.parse(ticketsHolderString)
     }
+
   }
 
   setUser(user: IUser){
     this.user = user;
+    this.logo = user.logo ?? 'weli';
   }
 
 }

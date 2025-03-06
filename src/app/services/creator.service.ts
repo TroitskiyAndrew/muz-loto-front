@@ -97,6 +97,7 @@ export class CreatorService {
           },
         };
       }),
+      ticketsCount: settings.tickets,
       backgroundMusic: settings.backgroundMusic,
       code: this.generateCode(),
       results: {

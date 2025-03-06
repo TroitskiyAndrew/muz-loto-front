@@ -22,7 +22,6 @@ export class ApiService {
 
   auth(credentials: ICredentials) {
     const url = `${environment.backendUrl}/auth`;
-    console.log(url);
     return this.http
       .post<IAuthResponse>(url, credentials)
       .toPromise().then(res => res || null)
@@ -71,7 +70,7 @@ export class ApiService {
   getGame(code: string) {
     const url = `${environment.backendUrl}/gameByCode/${code}`;
     return this.http
-      .get(url)
+      .get<IGame>(url)
       .toPromise()
       .then(res => res || null)
       .catch((error) => {
@@ -83,12 +82,12 @@ export class ApiService {
   getGames() {
     const url = `${environment.backendUrl}/games`;
     return this.http
-      .get(url)
+      .get<IGame[]>(url)
       .toPromise()
-      .then(res => res || null)
+      .then(res => res || [])
       .catch((error) => {
         console.log(error);
-        return null;
+        return [] as IGame[];
       });
   }
 
