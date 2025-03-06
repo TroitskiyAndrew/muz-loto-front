@@ -199,8 +199,7 @@ export class CreatorService {
 
       result.push(ticket);
     }
-    // const tickets = await this.apiService.createTickets({gameId: game.id, tickets: result}) || []
-    return result.map(t => ({...t, id: 'qwerrbxcbsdfg'}));
+    return this.apiService.createTickets(game.id, result) || [];
   }
 
 }

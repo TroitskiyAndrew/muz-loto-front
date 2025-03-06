@@ -13,12 +13,13 @@ import {
   INewGameTickets,
 } from '../models/models';
 import { environment } from '../../environments/environment';
+import { StateService } from './state.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private stateService: StateService) {}
 
   auth(credentials: ICredentials) {
     const url = `${environment.backendUrl}/auth`;
@@ -80,7 +81,7 @@ export class ApiService {
   }
 
   getGames() {
-    const url = `${environment.backendUrl}/games`;
+    const url = `${environment.backendUrl}/games/${this.stateService.user?.id || ''}`;
     return this.http
       .get<IGame[]>(url)
       .toPromise()
@@ -175,27 +176,53 @@ export class ApiService {
       });
   }
 
-  getTickets() {
-    const url = `${environment.backendUrl}/tickets`;
+  getTickets(gameId: string) {
+    return this.getTicketsBatch(gameId, []);
+  }
+
+  getTicketsBatch(gameId: string, acc: ITicket[]): Promise<ITicket[]>{
+    const url = `${environment.backendUrl}/tickets/${gameId}`;
     return this.http
-      .get<ITicket[]>(url)
+      .get<{isMore: boolean; tickets: ITicket[]}>(url)
       .toPromise()
       .then(res => res || null)
       .catch((error) => {
         console.log(error);
         return null;
+      }).then((res) => {
+        acc.push(...(res?.tickets  || []));
+        if (res?.isMore){
+          return this.getTicketsBatch(gameId, acc)
+        } else {
+          return acc;
+        }
       });
   }
 
-  createTickets(tickets: INewGameTickets) {
-    const url = `${environment.backendUrl}/tickets`;
-    return this.http
-      .post<ITicket[]>(url, tickets)
+  createTickets(gameId: string, tickets: ITicket[]) {
+    return this.sendTicketsBatch(gameId, tickets, [], 0);
+  }
+
+  sendTicketsBatch(gameId: string, tickets: ITicket[], acc: ITicket[], step: number): Promise<ITicket[]>{
+    const ticketsToSend = tickets.splice(0, 3);
+    console.log('size', ticketsToSend.length)
+    console.log('rest', tickets.length)
+    acc.push(...ticketsToSend);
+    const url = `${environment.backendUrl}/tickets/${gameId}`;
+    return (step === 0 ? this.http
+      .post<ITicket[]>(url, ticketsToSend) : this.http
+      .put<ITicket[]>(url, ticketsToSend))
       .toPromise()
       .then(res => res || null)
       .catch((error) => {
         console.log(error);
         return null;
+      }).then(() => {
+        if(tickets.length){
+          return this.sendTicketsBatch(gameId, tickets, acc, ++step);
+        } else {
+          return acc;
+        }
       });
   }
 }

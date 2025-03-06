@@ -17,7 +17,7 @@ export class AuthService {
     login() {
 
       const emailField = { id: 'email', label: 'email', control: new FormControl('', [Validators.required]) };
-      const passwordField = { id: 'password', label: 'password', control: new FormControl('', [Validators.required]) };
+      const passwordField = { id: 'password', type: 'password', label: 'password', control: new FormControl('', [Validators.required]) };
       return this.dialogService.init({
         message: 'Войти',
         fields: [emailField, passwordField],
@@ -45,7 +45,7 @@ export class AuthService {
     signUp() {
 
       const emailField = { id: 'email', label: 'email', control: new FormControl('', [Validators.required, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]) };
-      const passwordField = { id: 'password', label: 'password', control: new FormControl('', [Validators.required, Validators.pattern(/^[a-zA-Z0-9]+$/)]) };
+      const passwordField = { id: 'password', type: 'password', label: 'password', control: new FormControl('', [Validators.required, Validators.pattern(/^[a-zA-Z0-9]+$/)]) };
       return this.dialogService.init({
         fields: [emailField, passwordField],
         buttons: [{

@@ -186,9 +186,7 @@ export class CreateGamePageComponent {
       this.form.getRawValue()
     );
     this.loadingService.hide()
-    this.stateService.ticketsHolder[game.id] = tickets;
-    localStorage.setItem('ticketsHolder', JSON.stringify(this.stateService.ticketsHolder));
-    // this.router.navigate(['/'])
+    this.router.navigate(['/'])
   }
 
   playBackground() {

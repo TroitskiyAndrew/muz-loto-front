@@ -30,8 +30,8 @@ export class GamesPageComponent {
     })
   }
 
-  printTickets(gameId: string){
-    this.tickets = this.stateService.ticketsHolder[gameId];
+  async printTickets(gameId: string){
+    this.tickets = await this.apiService.getTickets(gameId);
     this.showTickets = true;
   }
 

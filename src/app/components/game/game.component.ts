@@ -44,7 +44,6 @@ export class GameComponent implements OnDestroy{
   wantedWinner: Winner | null = Winner.Line;
   time = 0;
   currentStep = 0;
-  songsArray: string[] = [];
   deep = DEEP;
   boost = 1000;
   errors = 0;
@@ -60,6 +59,7 @@ export class GameComponent implements OnDestroy{
   simulation = false;
   tickets: ITicket[] = [];
   $init = new Subject<boolean>();
+  block = false;
 
 
   constructor(
@@ -88,7 +88,7 @@ export class GameComponent implements OnDestroy{
         buttons: [{
           label: 'Ок',
           disabled: () => codeField.control.invalid,
-          action: async () => codeField.control.value as string,
+          action: () => codeField.control.value as string,
         },
         {
           label: 'Выход',
@@ -98,10 +98,8 @@ export class GameComponent implements OnDestroy{
         }
         ]
       })
-      if(code === null){
-        this.router.navigate([''])
-        return;
-      }
+      this.router.navigate(code != null ? ['game/', code] : ['']);
+      return;
     }
     this.loadingService.show()
     const game = await this.apiService.getGame(code);
@@ -112,7 +110,9 @@ export class GameComponent implements OnDestroy{
     }
     this.game = game!;
     this.stateService.gameCode = this.game.code;
-    this.tickets = this.stateService.ticketsHolder[this.game.id];
+    this.loadingService.show()
+    this.tickets = await this.apiService.getTickets(this.game.id);
+    this.loadingService.hide();
     const countField = { id: 'count', type: 'number', label: '', control: new FormControl<number>(16, [Validators.required]) };
     const ticketsCount = await this.dialogService.init({
       message: 'Сколько билетов в игре?',
@@ -132,14 +132,18 @@ export class GameComponent implements OnDestroy{
       }
       ]
     })
+    if(!ticketsCount) {
+      this.router.navigate([''])
+      return;
+    }
     this.wastedTickets = this.tickets.map(ticket => ticket.number).filter(number => number > ticketsCount);
 
     this.playerService.gameMode = true;
     this.playerService.playBackGround();
     this.socketService.onMessage<boolean | null>(SocketMessageType.Player, ({data}) => {
-      if(data === true){
+      if(data === true ){
         this.nextSong();
-      } else if(data === false){
+      } else if(data === false && this.block){
         this.playerService.stop();
       }
     });
@@ -148,6 +152,11 @@ export class GameComponent implements OnDestroy{
         this.wastedTickets = Array.from(new Set([...this.wastedTickets, ...data.tickets]))
       } else {
         this.wastedTickets = this.wastedTickets.filter(ticket => !data.tickets.includes(ticket))
+      }
+    });
+    this.socketService.onMessage<TicketsMessagePayload>(SocketMessageType.Game, () => {
+      if(this.currentStep === 0){
+        this.startGame();
       }
     });
     this.$init.next(true)
@@ -234,6 +243,11 @@ export class GameComponent implements OnDestroy{
   }
 
   nextSong() {
+    console.log(this.wastedTickets)
+    if(this.block) {
+      return;
+    }
+    this.block = true;
     if (!this.playerService.$init.value) {
       return;
     }
@@ -251,6 +265,7 @@ export class GameComponent implements OnDestroy{
     if (this.currentWinners.size ) {
       this.askWinner(this.currentWinners);
     }
+    this.block = false;
   }
 
   handleStart() {
