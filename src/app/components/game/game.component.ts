@@ -83,7 +83,7 @@ export class GameComponent implements OnDestroy{
     if(!code){
       const codeField = { id: 'code', label: '', control: new FormControl('', [Validators.required]) };
       code = await this.dialogService.init({
-        message: 'введите код игры',
+        message: 'Введите код игры',
         fields: [codeField],
         buttons: [{
           label: 'Ок',
@@ -112,7 +112,28 @@ export class GameComponent implements OnDestroy{
     }
     this.game = game!;
     this.stateService.gameCode = this.game.code;
-    this.tickets = this.stateService.ticketsHolder[this.game.id]
+    this.tickets = this.stateService.ticketsHolder[this.game.id];
+    const countField = { id: 'count', type: 'number', label: '', control: new FormControl<number>(16, [Validators.required]) };
+    const ticketsCount = await this.dialogService.init({
+      message: 'Сколько билетов в игре?',
+      fields: [countField],
+      buttons: [{
+        label: 'Ок',
+        disabled: () => countField.control.invalid,
+        action: async () => {
+          return countField.control.value;
+        }
+      },
+      {
+        label: 'Отмена',
+        disabled: () => false,
+        action: () => [],
+        class: 'cancel'
+      }
+      ]
+    })
+    this.wastedTickets = this.tickets.map(ticket => ticket.number).filter(number => number > ticketsCount);
+
     this.playerService.gameMode = true;
     this.playerService.playBackGround();
     this.socketService.onMessage<boolean | null>(SocketMessageType.Player, ({data}) => {
@@ -152,7 +173,7 @@ export class GameComponent implements OnDestroy{
   simulateNewGame() {
     // this.game = this.creatorService.generateGame();
     this.gameWinners = [];
-    this.wastedTickets = this.tickets.map(ticket => ticket.number).filter(number => number > 10);
+    this.wastedTickets = this.tickets.map(ticket => ticket.number)
 
     for (let i = 0; i < this.game.rounds.length; i++) {
       this.roundIndex = i;
