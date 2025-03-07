@@ -145,6 +145,7 @@ export class GameComponent implements OnDestroy{
     const now = new Date();
     this.game.results.lastStart = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} ${now.getHours()}: ${now.getMinutes()}`;
     this.saveResults();
+    this.roundIndex = this.game.results.rounds.length == 0 ? 0 : this.game.results.rounds.length - 1;
     this.playerService.gameMode = true;
     this.playerService.playBackGround();
     this.socketService.onMessage<boolean | null>(SocketMessageType.Player, ({data}) => {
@@ -240,7 +241,6 @@ export class GameComponent implements OnDestroy{
   }
 
   nextSong() {
-    console.log(this.wastedTickets)
     if(this.block) {
       return;
     }
