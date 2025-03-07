@@ -1,5 +1,6 @@
 <form [formGroup]="form">
   <button class="create-button" color="accent" mat-raised-button type="submit" [disabled]="form.invalid" (click)="createGame()">Создать игру</button>
+  <button class="create-button" color="primary" mat-raised-button type="submit" [disabled]="form.invalid" (click)="createGame(true)">Создать тестовую игру</button>
   <div class="settings">
     <div class="settings__main">
       <label>

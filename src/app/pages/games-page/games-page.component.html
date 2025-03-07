@@ -1,6 +1,9 @@
 <div class="games">
-  <div *ngFor="let game of games" class="game">
+  <div *ngFor="let game of games" class="game" [ngClass]="{ 'test': game.testGame }">
     <div class="game__info">
+      <div *ngIf="game.testGame" class="game__info__item">
+        <div class="game__info__label">Тестовая игра</div>
+      </div>
       <div class="game__info__item">
         <div class="game__info__label">Код</div>
         <div class="game__info__value">{{ game.code }}</div>

@@ -60,6 +60,7 @@ export class GameComponent implements OnDestroy{
   tickets: ITicket[] = [];
   $init = new Subject<boolean>();
   block = false;
+  testPeriod = 15;
 
 
   constructor(
@@ -145,6 +146,9 @@ export class GameComponent implements OnDestroy{
     const now = new Date();
     this.game.results.lastStart = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} ${now.getHours()}: ${now.getMinutes()}`;
     this.saveResults();
+    if(this.game.testGame){
+      this.dialogService.popUp({message: `Это тестовая игра. Вы сможете сделать ${this.testPeriod} ходов`});
+    }
     this.roundIndex = this.game.results.rounds.length == 0 ? 0 : this.game.results.rounds.length - 1;
     this.playerService.gameMode = true;
     this.playerService.playBackGround(this.game.backgroundMusic);
@@ -218,7 +222,7 @@ export class GameComponent implements OnDestroy{
     this.block = false;
     const savedRoundResults = this.game.results.rounds[this.roundIndex];
     this.playedSongs = savedRoundResults ? [...savedRoundResults.playedSongs] : [];
-    this.currentStep = savedRoundResults?.step || 0
+    this.currentStep = savedRoundResults?.step || 0;
     this.wantedWinner = Winner.Line;
     this.currentRound = this.game.rounds[this.roundIndex];
     this.currentRoundTickets = this.tickets.map((ticket) => {
@@ -280,6 +284,11 @@ export class GameComponent implements OnDestroy{
       this.game.results.rounds[this.roundIndex] = {step: 0, playedSongs: []}
     }
     this.showName = false;
+    if(this.game.testGame && this.currentStep === this.testPeriod){
+      this.dialogService.popUp({message: 'Это была тестовая игра'});
+      this.router.navigate(['']);
+      return;
+    }
     this.game.results.rounds[this.roundIndex].step++
     this.currentStep++;
     this.deep = DEEP + Math.floor(this.currentStep / 10);

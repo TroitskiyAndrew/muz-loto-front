@@ -177,22 +177,24 @@ export class CreateGamePageComponent {
     return this.form.get('rounds') as FormArray;
   }
 
-  async createGame() {
-    if(!this.stateService.user?.gamesCredit){
+  async createGame(testGame = false) {
+    if(!this.stateService.user?.gamesCredit && !testGame){
       this.dialogService.popUp({errorMessage: 'У вас закончились купленные игры :-('}, 'Понятно');
       return;
     }
     this.loadingService.show();
     const game = await this.creatorService.generateGame(
       this.songsWithSettings,
-      this.form.getRawValue()
+      {...this.form.getRawValue(), testGame }
     );
     await this.creatorService.generateTickets(
       game,
       this.form.getRawValue()
     );
-    this.stateService.user!.gamesCredit--
-    await this.apiService.decreaseUserGames(this.stateService.user!.id || '')
+    if(!testGame){
+      this.stateService.user!.gamesCredit--
+      await this.apiService.decreaseUserGames(this.stateService.user!.id || '')
+    }
     this.loadingService.hide()
     this.router.navigate(['/'])
   }

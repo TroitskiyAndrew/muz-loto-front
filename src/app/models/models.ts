@@ -4,6 +4,7 @@ import { FormControl } from "@angular/forms";
 export interface IGameSettings {
   tickets: number;
   backgroundMusic: IBackgroundMusic;
+  testGame: boolean;
   rounds: IRoundSettings[];
 }
 
@@ -52,6 +53,7 @@ export interface IGame {
   id: string;
   code: string;
   owner: string;
+  testGame: boolean;
   rounds: IRound[];
   results: IGameResults;
   ticketsCount: number;
