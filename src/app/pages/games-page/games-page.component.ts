@@ -38,4 +38,7 @@ export class GamesPageComponent {
   runGame(code: string){
     this.router.navigate(['runGame', code])
   }
+  startGame(code: string){
+    this.router.navigate(['game', code])
+  }
 }

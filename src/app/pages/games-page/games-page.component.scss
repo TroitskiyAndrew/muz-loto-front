@@ -6,6 +6,7 @@
 }
 
 .game{
+  position: relative;
   display: flex;
   align-items: center;
   column-gap: 20px;
@@ -14,8 +15,8 @@
   border: 1px solid black;
   border-radius: 10px;
 
-  &.test{
-    background-color: rgb(187, 185, 185);
+  &.test-game{
+    background-color: rgb(233, 231, 231);
   }
 
   &__info {
@@ -126,3 +127,8 @@
   page-break-after: always;
 }
 
+.test {
+  position: absolute;
+    top: 0;
+    color: red;
+}
