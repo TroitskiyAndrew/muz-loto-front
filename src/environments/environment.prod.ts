@@ -4,5 +4,5 @@ export const environment = {
   videoStep: 5,
   videoStepDuration: 100,
   backgroundVolume: 30,
-  backendUrl: 'https://cherepavel.com/muzloto'
+  backendUrl: 'http://5.101.179.132:3999'
 };
