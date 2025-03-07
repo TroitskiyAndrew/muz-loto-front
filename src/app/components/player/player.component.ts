@@ -31,6 +31,11 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
     }
     this.playerService.stop();
   }
+  @HostListener('contextmenu', ['$event'])
+  onRightClick(event: MouseEvent) {
+    event.stopImmediatePropagation();
+    event.preventDefault();
+  }
 
   ngAfterViewInit() {
     // Проверяем, если API уже загружен

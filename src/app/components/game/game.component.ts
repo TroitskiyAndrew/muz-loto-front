@@ -147,7 +147,7 @@ export class GameComponent implements OnDestroy{
     this.saveResults();
     this.roundIndex = this.game.results.rounds.length == 0 ? 0 : this.game.results.rounds.length - 1;
     this.playerService.gameMode = true;
-    this.playerService.playBackGround();
+    this.playerService.playBackGround(this.game.backgroundMusic);
     this.socketService.onMessage<boolean | null>(SocketMessageType.Player, ({data}) => {
       if(data === true ){
         this.nextSong();
