@@ -10,6 +10,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { StateService } from '../../services/state.service';
 import { Router } from '@angular/router';
+import { DialogService } from '../../services/dialog.service';
 
 @Component({
   selector: 'app-create-game-page',
@@ -41,7 +42,8 @@ export class CreateGamePageComponent {
     private fb: FormBuilder,
     private apiService: ApiService,
     private stateService: StateService,
-    private router: Router
+    private router: Router,
+    private dialogService: DialogService,
   ) {
     this.init();
     this.form = this.fb.group({
@@ -176,15 +178,21 @@ export class CreateGamePageComponent {
   }
 
   async createGame() {
-    this.loadingService.show()
+    if(!this.stateService.user?.gamesCredit){
+      this.dialogService.popUp({errorMessage: 'У вас закончились купленные игры :-('}, 'Понятно');
+      return;
+    }
+    this.loadingService.show();
     const game = await this.creatorService.generateGame(
       this.songsWithSettings,
       this.form.getRawValue()
     );
-    const tickets = await this.creatorService.generateTickets(
+    await this.creatorService.generateTickets(
       game,
       this.form.getRawValue()
     );
+    this.stateService.user!.gamesCredit--
+    await this.apiService.decreaseUserGames(this.stateService.user!.id || '')
     this.loadingService.hide()
     this.router.navigate(['/'])
   }

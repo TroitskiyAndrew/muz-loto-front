@@ -1,5 +1,5 @@
-<form [formGroup]="form" (ngSubmit)="createGame()">
-  <button class="create-button" color="accent" mat-raised-button type="submit" [disabled]="form.invalid">Создать игру</button>
+<form [formGroup]="form">
+  <button class="create-button" color="accent" mat-raised-button type="submit" [disabled]="form.invalid" (click)="createGame()">Создать игру</button>
   <div class="settings">
     <div class="settings__main">
       <label>

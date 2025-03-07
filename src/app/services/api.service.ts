@@ -56,10 +56,10 @@ export class ApiService {
       });
   }
 
-  updateUser(user: IUser) {
-    const url = `${environment.backendUrl}/users`;
+  decreaseUserGames(id: string) {
+    const url = `${environment.backendUrl}/users/${id}`;
     return this.http
-      .put<IAuthResponse>(url, user)
+      .put<IAuthResponse>(url, {})
       .toPromise()
       .then(res => res || null)
       .catch((error) => {

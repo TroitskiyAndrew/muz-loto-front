@@ -99,7 +99,7 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
         onReady: () => {
           this.sub = this.playerService.$playBackGround.subscribe((backgroundMusic) => {
             this.playerService.backgroundMusic = backgroundMusic;
-            this.player.loadVideoById(backgroundMusic.youtubeId);
+            this.backgroundPlayer.loadVideoById(backgroundMusic.youtubeId);
             this.backgroundPlayer.setVolume(0);
             this.backgroundPlayer.seekTo(backgroundMusic.start, true);
             this.increaseVolume(false, false);
