@@ -16,7 +16,7 @@
     </div>
     <div class="game__actions">
       <button color="primary" mat-raised-button class="tickets__print" (click)="printTickets(game.id)">Печать билетов</button>
-      <button color="accent" mat-raised-button class="tickets__run" (click)="runGame(game.code)">Запустить игру</button>
+      <button color="accent" mat-raised-button class="tickets__run" (click)="runGame(game.code)">Управлять игрой</button>
     </div>
   </div>
 
@@ -58,11 +58,11 @@
           </div>
           <table class="table-bordered">
             <tbody>
-              <tr *ngFor="let row of ticket.rounds[0].field">
+              <tr *ngFor="let row of ticket.rounds[1].field">
                 <td *ngFor="let cell of row">
                   <div class="player-cell">
                     <div>{{ cell.artist }}</div>
-                    <div>{{ cell.name }}</div>
+                    <div>{{ cell.name.length > 15 ? cell.name.slice(0,15) + "..." : cell.name }}</div>
 
                   </div>
                 </td>

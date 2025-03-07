@@ -121,7 +121,7 @@ export class GameComponent implements OnDestroy{
         label: 'Ок',
         disabled: () => countField.control.invalid,
         action: async () => {
-          return countField.control.value;
+          return Number(countField.control.value);
         }
       },
       {
