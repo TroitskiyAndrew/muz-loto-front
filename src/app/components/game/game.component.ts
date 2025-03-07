@@ -217,13 +217,13 @@ export class GameComponent implements OnDestroy{
 
   playNewGame(){
     this.gameWinners = [];
-    this.wastedTickets = [];
     this.roundIndex = 0;
     this.prepareRound();
   }
 
   prepareRound() {
     this.showName = false;
+    this.block = false;
     this.playedSongs = [];
     this.currentStep = 0;
     this.wantedWinner = Winner.Line;
