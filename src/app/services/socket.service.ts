@@ -62,7 +62,7 @@ export class SocketService {
   }
 
   excludeTickets(tickets: number[]) {
-    this.sendMessage<TicketsMessagePayload>({ type: SocketMessageType.Tickets,  data: { add: true, tickets } });
+    this.sendMessage<TicketsMessagePayload>({ type: SocketMessageType.Tickets,  data: { add: false, tickets } });
   }
 
 }

@@ -92,7 +92,7 @@ export class ApiService {
       });
   }
 
-  updateGame(game: Pick<IGame, 'results'>) {
+  updateGame(game: Pick<IGame, 'id' | 'results'>) {
     const url = `${environment.backendUrl}/games`;
     return this.http
       .put(url, game)
@@ -205,8 +205,6 @@ export class ApiService {
 
   sendTicketsBatch(gameId: string, tickets: ITicket[], acc: ITicket[], step: number): Promise<ITicket[]>{
     const ticketsToSend = tickets.splice(0, 3);
-    console.log('size', ticketsToSend.length)
-    console.log('rest', tickets.length)
     acc.push(...ticketsToSend);
     const url = `${environment.backendUrl}/tickets/${gameId}`;
     return (step === 0 ? this.http

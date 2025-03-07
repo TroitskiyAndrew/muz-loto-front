@@ -70,14 +70,15 @@ export type INewGame  = Omit<IGame, 'id'>
 
 export interface IGameResults {
   lastStart: string | null;
-  currentWinners: number[];
+  wantedWinner: Winner | null;
+  gameWinners: number[];
   wastedTickets: number[];
   rounds: IRoundResults[];
 }
 
 export interface IRoundResults {
-  gameWinners: number[],
   playedSongs: string[],
+  step: number;
 }
 
 export interface IRound {

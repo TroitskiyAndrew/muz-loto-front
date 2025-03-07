@@ -78,9 +78,9 @@ export class RunPageComponent {
         label: 'Эти',
         disabled: () => exactField.control.invalid || fromField.control.invalid || toField.control.invalid,
         action: async () => {
-          const exact = exactField.control.value;
-          const from = fromField.control.value;
-          const to = toField.control.value;
+          const exact = exactField.control.value ? Number(exactField.control.value) : null;
+          const from = fromField.control.value ? Number(fromField.control.value) : null;
+          const to = toField.control.value ? Number(toField.control.value) : null;
           if(exact) {
             return [exact];
           }

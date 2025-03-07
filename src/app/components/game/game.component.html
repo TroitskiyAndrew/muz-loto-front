@@ -1,6 +1,6 @@
 <div class="game" *ngIf="$init | async" [ngClass]="stateService.showCards ? 'cards' : ''">
   <ng-container *ngIf="!stateService.showCards">
-    <div *ngIf="!isGameStarted" class="game__start" (click)="startGame()">
+    <div *ngIf="!isGameStarted" class="game__start" (click)="startRound()">
       <img src="assets/logo.png" alt="">
     </div>
     <div *ngIf="isGameStarted" class="game__round" (click)="handleClick($event)"

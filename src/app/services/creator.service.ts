@@ -47,7 +47,7 @@ export class CreatorService {
       rounds: settings.rounds.map((round, index) => {
         const mandatorySongsForRound = randomizedMandatorySongs.filter(song => song.round === index + 1)
         const usedArtists = new Set<string>(mandatorySongsForRound.map(song => song.artist));
-        const songs: ISong[] = mandatorySongsForRound;
+        const songs: ISong[] = [...mandatorySongsForRound];
         this.addSongs(songs, prioritySongs, usedSongs, usedArtists, round);
         this.addSongs(songs, nonPrioritySongs, usedSongs, usedArtists, round);
         if (songs.length !== round.roundFieldColumns * round.roundFieldRows) {
@@ -102,7 +102,8 @@ export class CreatorService {
       code: this.generateCode(),
       results: {
         lastStart: null,
-        currentWinners: [],
+        wantedWinner: Winner.Line,
+        gameWinners: [],
         wastedTickets: [],
         rounds: [],
       },
