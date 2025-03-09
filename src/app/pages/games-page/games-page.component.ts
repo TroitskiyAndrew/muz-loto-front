@@ -20,7 +20,8 @@ export class GamesPageComponent {
   games: IGame[] = [];
   showTickets = false;
   tickets: ITicket[] = [];
-  roundNames = ['Раунд 1', 'Раунд 2']
+  roundNames = ['Раунд 1', 'Раунд 2'];
+  ticketLogo = "";
 
   constructor(private apiService: ApiService, private loadingService: LoadingService, public stateService: StateService, private router: Router) {
     loadingService.show()
@@ -30,7 +31,8 @@ export class GamesPageComponent {
     })
   }
 
-  async printTickets(gameId: string){
+  async printTickets(gameId: string, logo: string){
+    this.ticketLogo = logo;
     this.tickets = await this.apiService.getTickets(gameId);
     this.showTickets = true;
   }

@@ -57,6 +57,7 @@ export interface IGame {
   rounds: IRound[];
   results: IGameResults;
   ticketsCount: number;
+  logo: string;
   backgroundMusic: IBackgroundMusic;
 }
 

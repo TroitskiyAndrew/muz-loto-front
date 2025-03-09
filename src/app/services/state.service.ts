@@ -18,7 +18,6 @@ import { AuthService } from './auth.service';
 })
 export class StateService {
   public showCards = false;
-  public logo = 'weli';
   gameCode = "";
   user: IUser | null = null;
   $init = new Subject<boolean>();
@@ -28,7 +27,6 @@ export class StateService {
 
   setUser(user: IUser){
     this.user = user;
-    this.logo = user.logo ?? 'weli';
   }
 
 }

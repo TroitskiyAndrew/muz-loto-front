@@ -16,7 +16,7 @@
       </div>
     </div>
     <div class="game__actions">
-      <button color="primary" mat-raised-button class="tickets__print" (click)="printTickets(game.id)">Печать билетов</button>
+      <button color="primary" mat-raised-button class="tickets__print" (click)="printTickets(game.id, game.logo)">Печать билетов</button>
       <button color="accent" mat-raised-button class="tickets__run" (click)="runGame(game.code)">Управлять игрой</button>
       <button color="accent" mat-raised-button class="tickets__run" (click)="startGame(game.code)">Запустить игру</button>
     </div>
@@ -32,7 +32,7 @@
           <div class="ticket-head">
             <div class="ticket-head__name">Билет №{{ticket.number}}</div>
             <div class="ticket-head__name">{{roundNames[0]}}</div>
-            <img class="ticket-head__logo" [src]="'assets/' + stateService.logo + '.png'" alt="">
+            <img class="ticket-head__logo" [src]="'assets/' + ticketLogo + '.png'" alt="">
           </div>
           <table class="table-bordered">
             <tbody>
@@ -56,7 +56,7 @@
           <div class="ticket-head">
             <div class="ticket-head__name">Билет №{{ticket.number}}</div>
             <div class="ticket-head__name">{{roundNames[1]}}</div>
-            <img class="ticket-head__logo" [src]="'assets/' + stateService.logo + '.png'" alt="">
+            <img class="ticket-head__logo" [src]="'assets/' + ticketLogo + '.png'" alt="">
           </div>
           <table class="table-bordered">
             <tbody>

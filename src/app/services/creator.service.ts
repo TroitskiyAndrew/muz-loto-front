@@ -44,6 +44,7 @@ export class CreatorService {
     const usedSongs = new Set<string>(randomizedMandatorySongs.map(song => song.id));
     const game: INewGame =  {
       owner: this.stateService.user?.id || '',
+      logo: this.stateService.user?.logo || '',
       rounds: settings.rounds.map((round, index) => {
         const mandatorySongsForRound = randomizedMandatorySongs.filter(song => song.round === index + 1)
         const usedArtists = new Set<string>(mandatorySongsForRound.map(song => song.artist));
