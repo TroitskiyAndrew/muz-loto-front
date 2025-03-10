@@ -4,5 +4,5 @@ export const environment = {
   videoStep: 5,
   videoStepDuration: 100,
   backgroundVolume: 30,
-  backendUrl: 'https://muz-loto-back.vercel.app'
+  backendUrl: 'https://muz-loto-back.onrender.com:3000'
 };
