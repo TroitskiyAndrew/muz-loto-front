@@ -89,7 +89,7 @@ export class RunPageComponent {
           } else {
             const first = from || 1;
             const last = to || 100;
-            return Array.from({ length: last - first + 1 }, (_, i) => last + i);
+            return Array.from({ length: last - first + 1 }, (_, i) => first + i);
           }
         }
       },

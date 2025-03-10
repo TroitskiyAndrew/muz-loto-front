@@ -160,10 +160,11 @@ export class GameComponent implements OnDestroy{
       }
     });
     this.socketService.onMessage<TicketsMessagePayload>(SocketMessageType.Tickets, ({data}) => {
+      const existedNumbers = this.currentRoundTickets.map(t => t.number)
       if(data.add){
-        this.wastedTickets = Array.from(new Set([...this.wastedTickets, ...data.tickets]))
+        this.wastedTickets = this.wastedTickets.filter(ticket => !data.tickets.includes(ticket)).sort()
       } else {
-        this.wastedTickets = this.wastedTickets.filter(ticket => !data.tickets.includes(ticket))
+        this.wastedTickets = Array.from(new Set([...this.wastedTickets, ...data.tickets])).filter(num => existedNumbers.includes(num)).sort()
       }
       this.saveResults();
     });
@@ -265,7 +266,7 @@ export class GameComponent implements OnDestroy{
     this.game.results.gameWinners = [...this.gameWinners];
     this.game.results.wastedTickets = [...this.wastedTickets]
     this.game.results.wantedWinner = this.wantedWinner;
-    this.apiService.updateGame({id, results})
+    this.apiService.updateResults({id, results})
   }
 
   handleStop(){
@@ -280,6 +281,7 @@ export class GameComponent implements OnDestroy{
   }
 
   handleStart() {
+    console.log(this.wastedTickets);
     if(!this.game.results.rounds[this.roundIndex]){
       this.game.results.rounds[this.roundIndex] = {step: 0, playedSongs: []}
     }
