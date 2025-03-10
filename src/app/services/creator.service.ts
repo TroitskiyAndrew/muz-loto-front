@@ -205,7 +205,7 @@ export class CreatorService {
       result.push(ticket);
     }
     if(add) {
-      await this.apiService.updateGame(game);
+      await this.apiService.updateGame({id: game.id, ticketsCount: game.ticketsCount });
     }
     return this.apiService.createTickets(game.id, result, Boolean(add)) || [];
   }

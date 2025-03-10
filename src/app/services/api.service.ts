@@ -105,18 +105,6 @@ export class ApiService {
       });
   }
 
-  updateResults(game: Pick<IGame, 'id' | 'results'>) {
-    const url = `${environment.backendUrl}/updateResults`;
-    return this.http
-      .put(url, game)
-      .toPromise()
-      .then(res => res || null)
-      .catch((error) => {
-        console.log(error);
-        return null;
-      });
-  }
-
   createGame(game: INewGame) {
     const url = `${environment.backendUrl}/games`;
     return this.http

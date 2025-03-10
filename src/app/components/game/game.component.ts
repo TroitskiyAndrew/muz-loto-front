@@ -266,7 +266,7 @@ export class GameComponent implements OnDestroy{
     this.game.results.gameWinners = [...this.gameWinners];
     this.game.results.wastedTickets = [...this.wastedTickets]
     this.game.results.wantedWinner = this.wantedWinner;
-    this.apiService.updateResults({id, results})
+    this.apiService.updateGame({id, results})
   }
 
   handleStop(){
