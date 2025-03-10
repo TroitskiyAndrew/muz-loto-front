@@ -16,7 +16,7 @@ import { Router } from '@angular/router';
 export class HomePageComponent implements OnDestroy{
 
   constructor(public authService: AuthService, public stateService: StateService, private router: Router) {
-    this.stateService.showHome = true;
+    this.stateService.showHome = false;
   }
 
   login() {
@@ -44,7 +44,7 @@ export class HomePageComponent implements OnDestroy{
   }
 
   ngOnDestroy(): void {
-    this.stateService.showHome = false;
+    this.stateService.showHome = true;
   }
 
 }
