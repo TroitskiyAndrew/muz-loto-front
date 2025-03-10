@@ -157,16 +157,18 @@ export class CreatorService {
     return result;
   }
 
-  public async generateTickets(game: IGame, settings: IGameSettings): Promise<ITicket[]> {
+  public async generateTickets(game: IGame, rounds: Pick<IRoundSettings, 'ticketFieldColumns' | 'ticketFieldRows'>[], add = 0): Promise<ITicket[]> {
     const result: ITicket[] = [];
-    for (let ticketIndex = 0; ticketIndex < settings.tickets; ticketIndex++) {
+    const ticketCurrentIndex = add ?  game.ticketsCount : 0;
+    game.ticketsCount += add;
+    for (let ticketIndex = ticketCurrentIndex; ticketIndex < game.ticketsCount; ticketIndex++) {
       const ticket: ITicket = {
         number: ticketIndex + 1,
         rounds: [],
       };
-      for (let roundIndex = 0; roundIndex < settings.rounds.length; roundIndex++) {
+      for (let roundIndex = 0; roundIndex < rounds.length; roundIndex++) {
         const field = [];
-        const roundSettings = settings.rounds[roundIndex];
+        const roundSettings = rounds[roundIndex];
         if (!roundSettings) {
           alert('Нет настроек для раунда');
         }
@@ -202,7 +204,10 @@ export class CreatorService {
 
       result.push(ticket);
     }
-    return this.apiService.createTickets(game.id, result) || [];
+    if(add) {
+      await this.apiService.updateGame(game);
+    }
+    return this.apiService.createTickets(game.id, result, Boolean(add)) || [];
   }
 
 }

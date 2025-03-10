@@ -8,7 +8,7 @@ import {
 } from '../models/models';
 import { environment } from '../../environments/environment';
 import { extractTimestamp, extractVideoId } from '../utils/utils';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { DEFAULT_BACKGROUND_MUSIC } from '../constants/constants';
 import { AuthService } from './auth.service';
 
@@ -20,7 +20,7 @@ export class StateService {
   public showCards = false;
   gameCode = "";
   user: IUser | null = null;
-  $init = new Subject<boolean>();
+  $init = new BehaviorSubject<boolean>(false);
   showHome = true;
 
   constructor() {}

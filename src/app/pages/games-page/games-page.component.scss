@@ -1,11 +1,11 @@
 .games {
   display: flex;
-    flex-direction: column;
-    row-gap: 25px;
-    padding: 25px;
+  flex-direction: column;
+  row-gap: 25px;
+  padding: 25px;
 }
 
-.game{
+.game {
   position: relative;
   display: flex;
   align-items: center;
@@ -15,24 +15,41 @@
   border: 1px solid black;
   border-radius: 10px;
 
-  &.test-game{
+  &.test-game {
     background-color: rgb(233, 231, 231);
   }
 
   &__info {
     display: flex;
-    align-items: center;
-    column-gap: 20px;
+    flex-direction: column;
+    row-gap: 5px;
+
+    &__test {
+      color: red;
+    }
     &__item {
       display: flex;
-    align-items: center;
-    flex-direction: column;
+      column-gap: 5px;
+    }
+    &__last {
+      flex-direction: column;
+      row-gap: 3px;
     }
     &__value {
       font-weight: 900;
     }
   }
   &__actions {
+    &__group {
+      display: flex;
+      flex-direction: column;
+      row-gap: 20px;
+    }
+
+    button {
+      padding: 5px;
+    }
+
     display: flex;
     align-items: center;
     column-gap: 20px;
@@ -47,7 +64,6 @@
   z-index: 20;
 }
 
-
 .ticket-head {
   width: 100%;
   display: flex;
@@ -60,7 +76,6 @@
     margin-right: 2px;
   }
 }
-
 
 .table-bordered {
   width: 100%;
@@ -80,7 +95,6 @@
   background-color: #f4f4f4; /* Светлый фон для заголовков */
 }
 
-
 .player-cell {
   display: flex;
   flex-direction: column;
@@ -92,9 +106,7 @@
     width: 100%;
     text-align: center;
   }
-
 }
-
 
 .player-section {
   width: 100%;
@@ -113,8 +125,6 @@
     flex-direction: column;
     align-items: center;
     row-gap: 10px;
-
-
   }
 }
 
@@ -122,13 +132,12 @@
   page-break-after: always;
 }
 
-
 .tickets .player:nth-child(3n) {
   page-break-after: always;
 }
 
 .test {
   position: absolute;
-    top: 0;
-    color: red;
+  top: 0;
+  color: red;
 }

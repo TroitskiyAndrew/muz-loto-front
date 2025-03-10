@@ -45,7 +45,15 @@ export class CreateGamePageComponent {
     private router: Router,
     private dialogService: DialogService,
   ) {
-    this.init();
+    this.loadingService.show();
+    const sub = this.stateService.$init.subscribe((init: boolean) => {
+      if(!init){
+        this.loadingService.hide()
+        return;
+      }
+      this.init().finally(() => this.loadingService.hide());
+      sub.unsubscribe()
+    })
     this.form = this.fb.group({
       tickets: [
         42,
@@ -117,7 +125,7 @@ export class CreateGamePageComponent {
   }
 
   async init() {
-    this.loadingService.show();
+
     const songs = (await this.songsService.getSongs()) || [];
     this.songsWithSettings = songs.map((song) => ({
       ...song,
@@ -143,7 +151,6 @@ export class CreateGamePageComponent {
         : true;
       return artistCondition && nameCondition;
     };
-    this.loadingService.hide();
   }
 
   eventHandler(event: Event) {
@@ -189,7 +196,7 @@ export class CreateGamePageComponent {
     );
     await this.creatorService.generateTickets(
       game,
-      this.form.getRawValue()
+      this.form.getRawValue().rounds
     );
     if(!testGame){
       this.stateService.user!.gamesCredit--

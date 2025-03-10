@@ -11,6 +11,7 @@ import {
   INewGame,
   ITicket,
   INewGameTickets,
+  GameUpdate,
 } from '../models/models';
 import { environment } from '../../environments/environment';
 import { StateService } from './state.service';
@@ -92,7 +93,7 @@ export class ApiService {
       });
   }
 
-  updateGame(game: Pick<IGame, 'id' | 'results'>) {
+  updateGame(game: GameUpdate) {
     const url = `${environment.backendUrl}/games`;
     return this.http
       .put(url, game)
@@ -199,8 +200,8 @@ export class ApiService {
       });
   }
 
-  createTickets(gameId: string, tickets: ITicket[]) {
-    return this.sendTicketsBatch(gameId, tickets, [], 0);
+  createTickets(gameId: string, tickets: ITicket[], add: boolean) {
+    return this.sendTicketsBatch(gameId, tickets, [], add ? 1 : 0);
   }
 
   sendTicketsBatch(gameId: string, tickets: ITicket[], acc: ITicket[], step: number): Promise<ITicket[]>{

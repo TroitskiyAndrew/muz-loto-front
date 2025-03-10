@@ -1,14 +1,17 @@
 <div class="games">
   <div *ngFor="let game of games" class="game" [ngClass]="{ 'test-game': game.testGame }">
     <div class="game__info">
-      <div class="test">Тестовая игра</div>
+      <div *ngIf="game.testGame" class="game__info__item game__info__test">
+        <div class="game__info__label">Тестовая игра</div>
+        <div class="game__info__value"></div>
+      </div>
       <div class="game__info__item">
         <div class="game__info__label">Код</div>
         <div class="game__info__value">{{ game.code }}</div>
       </div>
-      <div class="game__info__item">
+      <div class="game__info__item game__info__last">
         <div class="game__info__label">Последний запуск</div>
-        <div class="game__info__value">{{ game.results.lastStart || '-------------' }}</div>
+        <div class="game__info__value">{{ game.results.lastStart || '--------------------' }}</div>
       </div>
       <div class="game__info__item">
         <div class="game__info__label">Билеты</div>
@@ -16,9 +19,17 @@
       </div>
     </div>
     <div class="game__actions">
-      <button color="primary" mat-raised-button class="tickets__print" (click)="printTickets(game.id, game.logo)">Печать билетов</button>
-      <button color="accent" mat-raised-button class="tickets__run" (click)="runGame(game.code)">Управлять игрой</button>
-      <button color="accent" mat-raised-button class="tickets__run" (click)="startGame(game.code)">Запустить игру</button>
+      <div class="game__actions__group">
+        <button color="warn" mat-raised-button class="tickets__print" (click)="resetResults(game)" [disabled]="isResetDisabled(game)">Сбросить результаты</button>
+      </div>
+      <div class="game__actions__group">
+        <button color="primary" mat-raised-button class="tickets__print" (click)="printTickets(game.id, game.logo)">Печать билетов</button>
+        <button color="accent" mat-raised-button class="tickets__print" (click)="addTickets(game)">Добавить билеты</button>
+      </div>
+      <div class="game__actions__group">
+        <button color="primary" mat-raised-button class="tickets__run" (click)="runGame(game.code)">Управлять игрой</button>
+        <button color="accent" mat-raised-button class="tickets__run" (click)="startGame(game.code)">Запустить игру</button>
+      </div>
     </div>
   </div>
 

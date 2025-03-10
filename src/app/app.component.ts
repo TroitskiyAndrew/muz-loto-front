@@ -6,6 +6,7 @@ import { SocketMessageType } from './models/models';
 import { AuthService } from './services/auth.service';
 import { Router } from '@angular/router';
 import { ApiService } from './services/api.service';
+import { LoadingService } from './services/loading.service';
 let i = 0;
 @Component({
   selector: 'app-root',
@@ -19,7 +20,7 @@ export class AppComponent {
     private socketService: SocketService,
     private authService: AuthService,
     private router: Router,
-    private apiService: ApiService,
+    private loadingService: LoadingService,
   ) {
     this.socketService.onMessage<boolean>(
       SocketMessageType.Modal,
@@ -33,8 +34,11 @@ export class AppComponent {
   async init() {
     const userId = localStorage.getItem('user');
     if (userId) {
+      this.loadingService.show();
       await this.authService.restoreUser(userId);
+      this.loadingService.hide();
     }
+    this.stateService.$init.next(true)
   }
 
   goHome() {

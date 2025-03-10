@@ -61,6 +61,8 @@ export interface IGame {
   backgroundMusic: IBackgroundMusic;
 }
 
+export type GameUpdate = Partial<IGame> & Pick<IGame, 'id'>
+
 export interface IGameTickets {
   id: string;
   gameId: string;
