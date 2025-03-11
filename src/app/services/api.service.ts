@@ -33,8 +33,8 @@ export class ApiService {
       });
   }
 
-  getUser(id: string) {
-    const url = `${environment.backendUrl}/users/${id}`;
+  getUser() {
+    const url = `${environment.backendUrl}/users`;
     return this.http
       .get<IUser>(url)
       .toPromise()
@@ -46,7 +46,7 @@ export class ApiService {
   }
 
   createUser(newUser: INewUser) {
-    const url = `${environment.backendUrl}/new-user`;
+    const url = `${environment.backendUrl}/users`;
     return this.http
       .post<IAuthResponse>(url, newUser)
       .toPromise()
@@ -57,17 +57,6 @@ export class ApiService {
       });
   }
 
-  decreaseUserGames(id: string) {
-    const url = `${environment.backendUrl}/users/${id}`;
-    return this.http
-      .put<IAuthResponse>(url, {})
-      .toPromise()
-      .then(res => res || null)
-      .catch((error) => {
-        console.log(error);
-        return null;
-      });
-  }
 
   getGame(code: string) {
     const url = `${environment.backendUrl}/gameByCode/${code}`;
@@ -82,7 +71,7 @@ export class ApiService {
   }
 
   getGames() {
-    const url = `${environment.backendUrl}/games/${this.stateService.user?.id || ''}`;
+    const url = `${environment.backendUrl}/games`;
     return this.http
       .get<IGame[]>(url)
       .toPromise()

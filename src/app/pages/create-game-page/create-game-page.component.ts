@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { CreatorService } from '../../services/creator.service';
 import { SongsService } from '../../services/songs.service';
 import { IGame, IRoundSettings, ISong, ISongWithSettings } from '../../models/models';
@@ -11,13 +11,14 @@ import { ApiService } from '../../services/api.service';
 import { StateService } from '../../services/state.service';
 import { Router } from '@angular/router';
 import { DialogService } from '../../services/dialog.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-create-game-page',
   templateUrl: './create-game-page.component.html',
   styleUrl: './create-game-page.component.scss',
 })
-export class CreateGamePageComponent {
+export class CreateGamePageComponent implements OnDestroy {
   songsWithSettings: ISongWithSettings[] = [];
   displayedColumns: string[] = [
     'artist',
@@ -33,6 +34,7 @@ export class CreateGamePageComponent {
   artistFilter = '';
   nameFilter = '';
   form: FormGroup;
+  sub: Subscription
 
   constructor(
     private creatorService: CreatorService,
@@ -46,16 +48,15 @@ export class CreateGamePageComponent {
     private dialogService: DialogService,
   ) {
     this.loadingService.show();
-    const sub = this.stateService.$init.subscribe((init: boolean) => {
+    this.sub = this.stateService.$init.subscribe((init: boolean) => {
       if(!init){
         this.loadingService.hide()
         return;
       }
       this.init().finally(() => this.loadingService.hide());
-      sub.unsubscribe()
     })
     this.form = this.fb.group({
-      tickets: [
+      ticketsCount: [
         42,
         [Validators.required, Validators.min(12), Validators.max(60)],
       ],
@@ -189,24 +190,24 @@ export class CreateGamePageComponent {
       this.dialogService.popUp({errorMessage: 'У вас закончились купленные игры :-('}, 'Понятно');
       return;
     }
+    const settings = {...this.form.getRawValue(), testGame }
     this.loadingService.show();
-    const game = await this.creatorService.generateGame(
+    await this.creatorService.generateGame(
       this.songsWithSettings,
-      {...this.form.getRawValue(), testGame }
-    );
-    await this.creatorService.generateTickets(
+      settings
+    ).then(game => this.creatorService.generateTickets(
       game,
-      this.form.getRawValue().rounds
-    );
-    if(!testGame){
-      this.stateService.user!.gamesCredit--
-      await this.apiService.decreaseUserGames(this.stateService.user!.id || '')
-    }
-    this.loadingService.hide()
+      settings.rounds,
+      settings.ticketsCount
+    )).finally(() => this.loadingService.hide());
     this.router.navigate(['/'])
   }
 
   playBackground() {
     this.playerService.play(this.form.value.backgroundMusic);
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
   }
 }

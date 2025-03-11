@@ -86,18 +86,16 @@ export class AuthService {
       }
       this.stateService.setUser(res.user);
       localStorage.setItem('token', res.token);
-      localStorage.setItem('user', res.user.id);
     }
 
     logout(){
       localStorage.removeItem('token');
-      localStorage.removeItem('user');
       this.stateService.user = null;
     }
 
-    restoreUser(userId:string ){
+    restoreUser(){
       this.loadingService.show();
-      return this.apiService.getUser(userId).then(user => {
+      return this.apiService.getUser().then(user => {
         if(user){
           this.stateService.setUser(user);
         }

@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnDestroy } from '@angular/core';
 import { IGame, ITicket, Winner } from '../../models/models';
 import { ApiService } from '../../services/api.service';
 import { LoadingService } from '../../services/loading.service';
@@ -9,13 +9,14 @@ import { CreatorService } from '../../services/creator.service';
 import { DialogService } from '../../services/dialog.service';
 import { FormControl, Validators } from '@angular/forms';
 import { getDefaultResults } from '../../constants/constants';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-games-page',
   templateUrl: './games-page.component.html',
   styleUrl: './games-page.component.scss',
 })
-export class GamesPageComponent {
+export class GamesPageComponent implements OnDestroy {
   @HostListener('document:keydown.escape', ['$event'])
   handleEscape() {
     this.showTickets = false;
@@ -27,6 +28,7 @@ export class GamesPageComponent {
   gameId = '';
   roundNames = ['Раунд 1', 'Раунд 2'];
   ticketLogo = '';
+  sub: Subscription;
 
   constructor(
     private apiService: ApiService,
@@ -34,20 +36,21 @@ export class GamesPageComponent {
     public stateService: StateService,
     private router: Router,
     private creatorService: CreatorService,
-    private dialogService: DialogService,
+    private dialogService: DialogService
   ) {
     this.loadingService.show();
-    const sub = this.stateService.$init.subscribe((init: boolean) => {
-      if(!init){
-        this.loadingService.hide()
+    this.sub = this.stateService.$init.subscribe((init: boolean) => {
+      if (!init) {
+        this.loadingService.hide();
         return;
       }
-      this.apiService.getGames().then((games) => {
-        this.games = games;
-      }).finally(() => loadingService.hide());
-      sub.unsubscribe()
-    })
-
+      this.apiService
+        .getGames()
+        .then((games) => {
+          this.games = games;
+        })
+        .finally(() => loadingService.hide());
+    });
   }
 
   async printTickets(gameId: string, logo: string) {
@@ -91,35 +94,55 @@ export class GamesPageComponent {
   }
 
   async addTickets(game: IGame) {
-
-    const addField = { id: 'code', type: 'number', label: '', control: new FormControl(1, [Validators.required, Validators.min(1), Validators.max(50)]) };
+    const addField = {
+      id: 'code',
+      type: 'number',
+      label: '',
+      control: new FormControl(1, [
+        Validators.required,
+        Validators.min(1),
+        Validators.max(50),
+      ]),
+    };
     await this.dialogService.init({
       message: 'Сколько добавить билетов?',
       fields: [addField],
-      buttons: [{
-        label: 'Ок',
-        disabled: () => addField.control.invalid,
-        action: async () => {
-          this.loadingService.show();
-          const tickets = await this.getTickets(game.id);
-          const settings = tickets[0].rounds.map((ticket) => ({
-            ticketFieldColumns: ticket.field[0].length,
-            ticketFieldRows: ticket.field.length,
-          }));
-          this.loadingService.hide();
-          await this.creatorService.generateTickets(game, settings, Number(addField.control.value));
+      buttons: [
+        {
+          label: 'Ок',
+          disabled: () => addField.control.invalid,
+          action: async () => {
+            this.loadingService.show();
+            const tickets = await this.getTickets(game.id);
+            const settings = tickets[0].rounds.map((ticket) => ({
+              ticketFieldColumns: ticket.field[0].length,
+              ticketFieldRows: ticket.field.length,
+            }));
 
+            await this.creatorService
+              .generateTickets(
+                game,
+                settings,
+                Number(addField.control.value),
+                tickets.length
+              )
+              .then(
+                (addedTickets) => (game.ticketsCount += addedTickets.length)
+              )
+              .finally(() => this.loadingService.hide());
+          },
         },
-      },
-      {
-        label: 'Отмена',
-        disabled: () => false,
-        action: () => null,
-        class: 'cancel'
-      }
-      ]
-    })
+        {
+          label: 'Отмена',
+          disabled: () => false,
+          action: () => null,
+          class: 'cancel',
+        },
+      ],
+    });
+  }
 
-      ;
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
   }
 }

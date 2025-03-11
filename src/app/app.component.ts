@@ -32,12 +32,9 @@ export class AppComponent {
   }
 
   async init() {
-    const userId = localStorage.getItem('user');
-    if (userId) {
-      this.loadingService.show();
-      await this.authService.restoreUser(userId);
-      this.loadingService.hide();
-    }
+    this.loadingService.show();
+    await this.authService.restoreUser();
+    this.loadingService.hide();
     this.stateService.$init.next(true)
   }
 
