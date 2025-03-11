@@ -142,6 +142,14 @@ export class GamesPageComponent implements OnDestroy {
     });
   }
 
+  async deleteGame(gameId: string){
+    this.loadingService.show();
+    await this.apiService.deleteGame(gameId);
+    this.games = this.games.filter(game => game.id !== gameId);
+    this.loadingService.hide();
+
+  }
+
   ngOnDestroy(): void {
     this.sub.unsubscribe();
   }

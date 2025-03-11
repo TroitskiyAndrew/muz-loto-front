@@ -1,7 +1,7 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { CreatorService } from '../../services/creator.service';
 import { SongsService } from '../../services/songs.service';
-import { IGame, IRoundSettings, ISong, ISongWithSettings } from '../../models/models';
+import { IGame, IRoundSettings, ISong, ISongWithParams } from '../../models/models';
 import { LoadingService } from '../../services/loading.service';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -19,7 +19,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './create-game-page.component.scss',
 })
 export class CreateGamePageComponent implements OnDestroy {
-  songsWithSettings: ISongWithSettings[] = [];
+  songs: ISongWithParams[] = [];
   displayedColumns: string[] = [
     'artist',
     'name',
@@ -30,7 +30,7 @@ export class CreateGamePageComponent implements OnDestroy {
     'play',
   ];
   @ViewChild(MatSort) sort!: MatSort;
-  dataSource = new MatTableDataSource<ISongWithSettings>([]);
+  dataSource = new MatTableDataSource<ISongWithParams>([]);
   artistFilter = '';
   nameFilter = '';
   form: FormGroup;
@@ -127,19 +127,13 @@ export class CreateGamePageComponent implements OnDestroy {
 
   async init() {
 
-    const songs = (await this.songsService.getSongs()) || [];
-    this.songsWithSettings = songs.map((song) => ({
-      ...song,
-      priority: false,
-      disabled: false,
-      round: undefined,
-    }));
-    this.dataSource = new MatTableDataSource<ISongWithSettings>(
-      this.songsWithSettings
+    this.songs = (await this.songsService.getSongs()) || [];
+    this.dataSource = new MatTableDataSource<ISongWithParams>(
+      this.songs
     );
     this.dataSource.sort = this.sort;
     this.dataSource.filterPredicate = (
-      data: ISongWithSettings,
+      data: ISongWithParams,
       filter: string
     ) => {
       console.log('filterPredicate');
@@ -177,7 +171,7 @@ export class CreateGamePageComponent implements OnDestroy {
       .toLowerCase();
   }
 
-  playSong(song: ISongWithSettings) {
+  playSong(song: ISongWithParams) {
     this.playerService.play(song);
   }
 
@@ -193,7 +187,7 @@ export class CreateGamePageComponent implements OnDestroy {
     const settings = {...this.form.getRawValue(), testGame }
     this.loadingService.show();
     await this.creatorService.generateGame(
-      this.songsWithSettings,
+      this.songs,
       settings
     ).then(game => this.creatorService.generateTickets(
       game,

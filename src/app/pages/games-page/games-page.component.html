@@ -20,15 +20,16 @@
     </div>
     <div class="game__actions">
       <div class="game__actions__group">
-        <button color="warn" mat-raised-button class="tickets__print" (click)="resetResults(game)" [disabled]="isResetDisabled(game)">Сбросить результаты</button>
+        <button color="warn" mat-raised-button (click)="resetResults(game)" [disabled]="isResetDisabled(game)">Сбросить результаты</button>
+        <button color="warn" mat-raised-button (click)="deleteGame(game.id)" [disabled]="!stateService.user?.isAdmin && !game.testGame">Удалить игру</button>
       </div>
       <div class="game__actions__group">
-        <button color="primary" mat-raised-button class="tickets__print" (click)="printTickets(game.id, game.logo)">Печать билетов</button>
-        <button color="accent" mat-raised-button class="tickets__print" (click)="addTickets(game)">Добавить билеты</button>
+        <button color="primary" mat-raised-button (click)="printTickets(game.id, game.logo)">Печать билетов</button>
+        <button color="accent" mat-raised-button  (click)="addTickets(game)">Добавить билеты</button>
       </div>
       <div class="game__actions__group">
-        <button color="primary" mat-raised-button class="tickets__run" (click)="runGame(game.code)">Управлять игрой</button>
-        <button color="accent" mat-raised-button class="tickets__run" (click)="startGame(game.code)">Запустить игру</button>
+        <button color="primary" mat-raised-button  (click)="runGame(game.code)">Управлять игрой</button>
+        <button color="accent" mat-raised-button  (click)="startGame(game.code)">Запустить игру</button>
       </div>
     </div>
   </div>

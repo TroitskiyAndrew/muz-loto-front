@@ -36,10 +36,19 @@ export interface ISong {
 
 export type INewSong  = Omit<ISong, 'id'>
 
-export type ISongWithSettings = ISong & {
+export interface ISongPreferences {
   priority: boolean;
   disabled: boolean;
   round: number | undefined
+}
+export type ISongWithParams = ISong & ISongPreferences & {
+  history: ISongHistory[]
+}
+
+export interface ISongHistory {
+  code: string;
+  lastStart: string;
+  round: number;
 }
 
 export type IRoundSong = ISong & {
@@ -71,7 +80,18 @@ export interface IGameTickets {
 
 export type INewGameTickets  = Omit<IGameTickets, 'id'>
 
-export type INewGame  = Omit<IGame, 'id'>
+export type INewGame  = Omit<IGame, 'id'>;
+
+export interface INewGameParams {
+  game: INewGame;
+  songsPreferences: ({id: string} & ISongPreferences)[];
+  usedSongs:IUsedSongs[];
+}
+
+export interface IUsedSongs {
+  id: string;
+  round: number;
+}
 
 export interface IGameResults {
   lastStart: string | null;
@@ -160,9 +180,10 @@ export interface IUser {
   logo: string;
   gamesCredit: number;
   backgroundMusic: IBackgroundMusic;
+  isAdmin: boolean;
 }
 
-export type INewUser  = Omit<IUser, 'id' | 'gamesCredit'> & {hashedPassword: string}
+export type INewUser  = Omit<IUser, 'id' | 'gamesCredit' | 'isAdmin'> & {hashedPassword: string}
 
 export interface IAuthResponse {
   user: IUser;

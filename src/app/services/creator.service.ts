@@ -2,16 +2,20 @@ import { Injectable } from '@angular/core';
 import {
   IGameSettings,
   ISong,
-  ISongWithSettings,
+  ISongWithParams,
   IGame,
   IRoundSettings,
   IRoundSong,
   ITicket,
   Winner,
   INewGame,
+  IUsedSongs,
 } from '../models/models';
 import { StateService } from './state.service';
-import { DEFAULT_BACKGROUND_MUSIC, getDefaultResults } from '../constants/constants';
+import {
+  DEFAULT_BACKGROUND_MUSIC,
+  getDefaultResults,
+} from '../constants/constants';
 import { SongsService } from './songs.service';
 import { ApiService } from './api.service';
 
@@ -19,35 +23,60 @@ import { ApiService } from './api.service';
   providedIn: 'root',
 })
 export class CreatorService {
+  constructor(
+    private stateService: StateService,
+    private songsService: SongsService,
+    private apiService: ApiService
+  ) {}
 
-  constructor(private stateService: StateService, private songsService: SongsService, private apiService: ApiService) {}
-
-  public async generateGame(songs: ISongWithSettings[], settings: IGameSettings): Promise<IGame> {
-    const {mandatorySongs, usualSongs} = songs.reduce((result, song) => {
-      if(song.disabled){
+  public async generateGame(
+    songs: ISongWithParams[],
+    settings: IGameSettings
+  ): Promise<IGame> {
+    const { mandatorySongs, usualSongs } = songs.reduce(
+      (result, song) => {
+        if (song.disabled) {
+          return result;
+        }
+        if (
+          song.round != null &&
+          song.round > 0 &&
+          song.round <= settings.rounds.length
+        ) {
+          result.mandatorySongs.push(song);
+        } else {
+          result.usualSongs.push(song);
+        }
         return result;
+      },
+      {
+        mandatorySongs: [] as ISongWithParams[],
+        usualSongs: [] as ISongWithParams[],
       }
-      if(song.round != null && song.round > 0 && song.round <= settings.rounds.length){
-        result.mandatorySongs.push(song);
-      } else {
-        result.usualSongs.push(song);
-      }
-      return result;
-    }, {mandatorySongs: [] as ISongWithSettings[], usualSongs : [] as ISongWithSettings[]})
+    );
 
-    const randomizedMandatorySongs = mandatorySongs
-      .sort(() => Math.random() - 0.5);
-    const randomizedUsualSongs = usualSongs
-      .sort(() => Math.random() - 0.5);
+    const randomizedMandatorySongs = mandatorySongs.sort(
+      () => Math.random() - 0.5
+    );
+    const randomizedUsualSongs = usualSongs.sort(() => Math.random() - 0.5);
     const prioritySongs = randomizedUsualSongs.filter((song) => song.priority);
-    const nonPrioritySongs = randomizedUsualSongs.filter((song) => !song.priority);
-    const usedSongs = new Set<string>(randomizedMandatorySongs.map(song => song.id));
-    const game: INewGame =  {
+    const nonPrioritySongs = randomizedUsualSongs.filter(
+      (song) => !song.priority
+    );
+    const usedSongsArr: IUsedSongs[] = [];
+    const usedSongs = new Set<string>(
+      randomizedMandatorySongs.map((song) => song.id)
+    );
+    const game: INewGame = {
       owner: this.stateService.user?.id || '',
       logo: this.stateService.user?.logo || '',
       rounds: settings.rounds.map((round, index) => {
-        const mandatorySongsForRound = randomizedMandatorySongs.filter(song => song.round === index + 1)
-        const usedArtists = new Set<string>(mandatorySongsForRound.map(song => song.artist));
+        const mandatorySongsForRound = randomizedMandatorySongs.filter(
+          (song) => song.round === index + 1
+        );
+        const usedArtists = new Set<string>(
+          mandatorySongsForRound.map((song) => song.artist)
+        );
         const songs: ISong[] = [...mandatorySongsForRound];
         this.addSongs(songs, prioritySongs, usedSongs, usedArtists, round);
         this.addSongs(songs, nonPrioritySongs, usedSongs, usedArtists, round);
@@ -74,7 +103,9 @@ export class CreatorService {
           }
           field.push(row);
         }
-
+        usedSongsArr.push(
+          ...songs.map((song) => ({ id: song.id, round: index + 1 }))
+        );
         return {
           name: `Раунд №${index + 1}`,
           field,
@@ -104,9 +135,19 @@ export class CreatorService {
       testGame: settings.testGame,
       results: getDefaultResults(settings.rounds.length),
     };
-    const createdGame = await this.apiService.createGame(game);
-    if(!createdGame){
-      throw new Error('Не смог создать игру')
+
+    const createdGame = await this.apiService.createGame({
+      game,
+      songsPreferences: songs.map(({ id, priority, disabled, round }) => ({
+        id,
+        priority,
+        disabled,
+        round,
+      })),
+      usedSongs: usedSongsArr,
+    });
+    if (!createdGame) {
+      throw new Error('Не смог создать игру');
     }
     return createdGame;
   }
@@ -115,13 +156,13 @@ export class CreatorService {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
     for (let i = 0; i < 4; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
-}
+  }
   private addSongs(
     result: ISong[],
-    songs: ISongWithSettings[],
+    songs: ISongWithParams[],
     usedSongs: Set<string>,
     usedArtists: Set<string>,
     round: IRoundSettings
@@ -151,7 +192,12 @@ export class CreatorService {
     return result;
   }
 
-  public async generateTickets(game: IGame, rounds: Pick<IRoundSettings, 'ticketFieldColumns' | 'ticketFieldRows'>[], count: number, offset: number = 0): Promise<ITicket[]> {
+  public async generateTickets(
+    game: IGame,
+    rounds: Pick<IRoundSettings, 'ticketFieldColumns' | 'ticketFieldRows'>[],
+    count: number,
+    offset: number = 0
+  ): Promise<ITicket[]> {
     const result: ITicket[] = [];
     for (let ticketIndex = 0; ticketIndex < count; ticketIndex++) {
       const ticket: ITicket = {
@@ -198,6 +244,4 @@ export class CreatorService {
     }
     return this.apiService.createTickets(game.id, result, offset > 0) || [];
   }
-
 }
-

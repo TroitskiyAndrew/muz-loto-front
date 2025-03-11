@@ -12,6 +12,8 @@ import {
   ITicket,
   INewGameTickets,
   GameUpdate,
+  INewGameParams,
+  ISongWithParams,
 } from '../models/models';
 import { environment } from '../../environments/environment';
 import { StateService } from './state.service';
@@ -94,10 +96,22 @@ export class ApiService {
       });
   }
 
-  createGame(game: INewGame) {
+  createGame(params: INewGameParams) {
     const url = `${environment.backendUrl}/games`;
     return this.http
-      .post<IGame>(url, game)
+      .post<IGame>(url, params)
+      .toPromise()
+      .then(res => res || null)
+      .catch((error) => {
+        console.log(error);
+        return null;
+      });
+  }
+
+  deleteGame(gameId: string) {
+    const url = `${environment.backendUrl}/games/${gameId}`;
+    return this.http
+      .delete<IGame>(url)
       .toPromise()
       .then(res => res || null)
       .catch((error) => {
@@ -109,7 +123,7 @@ export class ApiService {
   getSongs() {
     const url = `${environment.backendUrl}/songs`;
     return this.http
-      .get<ISong[]>(url)
+      .get<ISongWithParams[]>(url)
       .toPromise()
       .then(res => res || null)
       .catch((error) => {
@@ -122,18 +136,6 @@ export class ApiService {
     const url = `${environment.backendUrl}/users`;
     return this.http
       .put(url, song)
-      .toPromise()
-      .then(res => res || null)
-      .catch((error) => {
-        console.log(error);
-        return null;
-      });
-  }
-
-  updateSongs(songs: ISong[], gameId: string) {
-    const url = `${environment.backendUrl}/users`;
-    return this.http
-      .put(url, {gameId, songIds: songs.map(song => song.id)})
       .toPromise()
       .then(res => res || null)
       .catch((error) => {

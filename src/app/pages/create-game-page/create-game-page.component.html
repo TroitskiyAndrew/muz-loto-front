@@ -81,21 +81,21 @@
     </ng-container>
 
     <ng-container matColumnDef="disabled">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Отключено </th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Исключить </th>
       <td mat-cell *matCellDef="let song">
         <mat-checkbox [(ngModel)]="song.disabled"></mat-checkbox>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="round">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Раунд </th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Поместить в раунд </th>
       <td mat-cell *matCellDef="let song">
         <input [id]="song.id + 'round'" type="number" min="1" max="2" style="width: 4ch;" [(ngModel)]="song.round">
        </td>
     </ng-container>
 
     <ng-container matColumnDef="play">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Послушать </th>
+      <th mat-header-cell *matHeaderCellDef > Послушать </th>
       <td mat-cell *matCellDef="let song">
         <button (click)="playSong(song)" mat-icon-button>
           <mat-icon>play_arrow</mat-icon>
