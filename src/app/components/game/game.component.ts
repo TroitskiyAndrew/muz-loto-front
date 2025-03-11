@@ -51,7 +51,7 @@ export class GameComponent implements OnDestroy{
   selectedSong: IRoundSong | null = null;
   playedSongs: string[] = [];
   currentWinners: Set<number> = new Set();
-  simulation = true;
+  simulation = false;
   tickets: ITicket[] = [];
   $init = new Subject<boolean>();
   block = false;
@@ -211,10 +211,13 @@ export class GameComponent implements OnDestroy{
   }
 
   startRound() {
+    this.currentRound = this.game.rounds[this.game.results.currentRoundIndex];
+    if(!this.currentRound){
+      return
+    }
     this.showName = false;
     this.block = false;
     this.playedSongs = this.game.results.rounds[this.game.results.currentRoundIndex].playedSongs;
-    this.currentRound = this.game.rounds[this.game.results.currentRoundIndex];
     this.currentRoundTickets = this.tickets.map((ticket) => {
       return {
         number: ticket.number,
