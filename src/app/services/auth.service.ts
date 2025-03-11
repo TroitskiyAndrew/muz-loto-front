@@ -57,9 +57,8 @@ export class AuthService {
             this.loadingService.show();
             const hashedPassword = await this.hashPassword(password);
             const logo = 'weli';
-            const gamesCredit = 0;
             const backgroundMusic = DEFAULT_BACKGROUND_MUSIC;
-            return await this.apiService.createUser({email, hashedPassword, logo, gamesCredit, backgroundMusic}).then(this.handleAuthResponse.bind(this)).finally(() => this.loadingService.hide());
+            return await this.apiService.createUser({email, hashedPassword, logo, backgroundMusic}).then(this.handleAuthResponse.bind(this)).finally(() => this.loadingService.hide());
           },
         },
         {

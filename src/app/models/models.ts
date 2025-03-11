@@ -161,7 +161,7 @@ export interface IUser {
   backgroundMusic: IBackgroundMusic;
 }
 
-export type INewUser  = Omit<IUser, 'id'> & {hashedPassword: string}
+export type INewUser  = Omit<IUser, 'id' | 'gamesCredit'> & {hashedPassword: string}
 
 export interface IAuthResponse {
   user: IUser;
