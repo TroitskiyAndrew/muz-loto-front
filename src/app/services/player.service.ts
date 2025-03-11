@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { IBackgroundMusic, ISong } from '../models/models';
+import { IBackgroundMusic, ISong, ISongForPlayer } from '../models/models';
 import { DEFAULT_BACKGROUND_MUSIC } from '../constants/constants';
 
 @Injectable({
@@ -8,7 +8,7 @@ import { DEFAULT_BACKGROUND_MUSIC } from '../constants/constants';
 })
 export class PlayerService {
 
-  public $video = new Subject<ISong>();
+  public $video = new Subject<ISongForPlayer>();
   public $init = new BehaviorSubject<boolean>(false);
   public $stop = new Subject();
   public $playBackGround = new Subject<IBackgroundMusic>();

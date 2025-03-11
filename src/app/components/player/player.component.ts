@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { PlayerService } from '../../services/player.service';
-import { ISong } from '../../models/models';
+import { ISong, ISongForPlayer } from '../../models/models';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { StateService } from '../../services/state.service';
@@ -119,7 +119,7 @@ export class PlayerComponent implements AfterViewInit, OnDestroy {
 
   }
 
-  private play(video: ISong) {
+  private play(video: ISongForPlayer) {
     this.block = true;
     (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex = '100';
     const { youtubeId, start } = video;

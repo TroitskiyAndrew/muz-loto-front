@@ -1,7 +1,14 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { CreatorService } from '../../services/creator.service';
 import { SongsService } from '../../services/songs.service';
-import { IGame, IRoundSettings, ISong, ISongWithParams } from '../../models/models';
+import {
+  IDisplaySong,
+  IGame,
+  IRoundSettings,
+  ISong,
+  ISongHistory,
+  ISongWithParams,
+} from '../../models/models';
 import { LoadingService } from '../../services/loading.service';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -19,22 +26,27 @@ import { Subscription } from 'rxjs';
   styleUrl: './create-game-page.component.scss',
 })
 export class CreateGamePageComponent implements OnDestroy {
-  songs: ISongWithParams[] = [];
+  songs: IDisplaySong[] = [];
   displayedColumns: string[] = [
+    'pending',
     'artist',
     'name',
     'rus',
+    'usageCount',
+    'lastUsage',
     'priority',
     'disabled',
     'round',
     'play',
   ];
   @ViewChild(MatSort) sort!: MatSort;
-  dataSource = new MatTableDataSource<ISongWithParams>([]);
+  dataSource = new MatTableDataSource<IDisplaySong>([]);
   artistFilter = '';
   nameFilter = '';
+  usageFilter = '';
   form: FormGroup;
-  sub: Subscription
+  songForm: FormGroup;
+  sub: Subscription;
 
   constructor(
     private creatorService: CreatorService,
@@ -45,16 +57,16 @@ export class CreateGamePageComponent implements OnDestroy {
     private apiService: ApiService,
     private stateService: StateService,
     private router: Router,
-    private dialogService: DialogService,
+    private dialogService: DialogService
   ) {
     this.loadingService.show();
     this.sub = this.stateService.$init.subscribe((init: boolean) => {
-      if(!init){
-        this.loadingService.hide()
+      if (!init) {
+        this.loadingService.hide();
         return;
       }
       this.init().finally(() => this.loadingService.hide());
-    })
+    });
     this.form = this.fb.group({
       ticketsCount: [
         42,
@@ -123,28 +135,47 @@ export class CreateGamePageComponent implements OnDestroy {
         }),
       ]),
     });
+    this.songForm = this.fb.group({
+      youtubeId: ['', [Validators.required]],
+      start: [0, [Validators.required, Validators.min(0)]],
+      artist: ['', [Validators.required]],
+      name: ['', [Validators.required]],
+      rus: [true, [Validators.required]],
+    });
   }
 
   async init() {
-
-    this.songs = (await this.songsService.getSongs()) || [];
-    this.dataSource = new MatTableDataSource<ISongWithParams>(
-      this.songs
-    );
+    this.songs = ((await this.songsService.getSongs()) || []).map(this.mapSong);
+    this.dataSource = new MatTableDataSource<IDisplaySong>(this.songs);
     this.dataSource.sort = this.sort;
-    this.dataSource.filterPredicate = (
-      data: ISongWithParams,
-      filter: string
-    ) => {
+    this.dataSource.filterPredicate = (data: IDisplaySong, filter: string) => {
       console.log('filterPredicate');
-      const [artist, name] = filter.split("='.'=");
+      const [artist, name, usageFilter] = filter.split("='.'=");
       const nameCondition = name
         ? data.name.toLowerCase().includes(name.toLowerCase())
         : true;
       const artistCondition = artist
         ? data.artist.toLowerCase().includes(artist.toLowerCase())
         : true;
-      return artistCondition && nameCondition;
+      const usageCondition = usageFilter
+        ? data.lastUsage.toLowerCase().includes(usageFilter.toLowerCase())
+        : true;
+      return artistCondition && nameCondition && usageCondition;
+    };
+  }
+
+  mapSong(song: ISongWithParams): IDisplaySong {
+    const { history, ...rest } = song;
+    const lastUsage = history[history.length - 1];
+    return {
+      ...rest,
+      lastUsage: lastUsage
+        ? `${lastUsage.code}/${lastUsage.round} ${
+            lastUsage.lastStart.split(' ')[0]
+          }`
+        : '',
+      usageCount: history.length,
+      pending: Boolean(song.owner)
     };
   }
 
@@ -164,8 +195,18 @@ export class CreateGamePageComponent implements OnDestroy {
     this.filter();
   }
 
+  filterByUsage(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.usageFilter = target.value;
+    this.filter();
+  }
+
   private filter() {
-    this.dataSource.filter = [this.artistFilter, this.nameFilter]
+    this.dataSource.filter = [
+      this.artistFilter,
+      this.nameFilter,
+      this.usageFilter,
+    ]
       .join("='.'=")
       .trim()
       .toLowerCase();
@@ -175,26 +216,63 @@ export class CreateGamePageComponent implements OnDestroy {
     this.playerService.play(song);
   }
 
+  playNewSong() {
+    this.playerService.play(this.songForm.value);
+  }
+
+  async createSong() {
+    const song = this.songForm.getRawValue();
+    if(this.songs.map(existedSong => existedSong.youtubeId).includes(song.youtubeId)){
+      await this.dialogService.popUp({errorMessage: 'Эта песня уже есть'}, 'Понял');
+      return;
+    }
+    this.loadingService.show();
+    const newSong = await this.apiService.createSong({ ...song, games: [] }).finally(() => this.loadingService.hide());
+    if (newSong) {
+      this.dataSource.data = [...this.dataSource.data, this.mapSong({...newSong, history: []})];
+    }
+  }
+
+  async acceptSong(song: IDisplaySong){
+    this.loadingService.show()
+    const updatedSong = await this.apiService.updateSong({id: song.id, owner: ''}).finally(() => this.loadingService.hide());
+    if(updatedSong){
+      song.pending = false;
+    }
+  }
+
   get rounds(): FormArray<FormGroup> {
     return this.form.get('rounds') as FormArray;
   }
 
+  getCodes(history: ISongHistory[]) {
+    return history.map((h) => h.code).join(', ');
+  }
+
   async createGame(testGame = false) {
-    if(!this.stateService.user?.gamesCredit && !testGame){
-      this.dialogService.popUp({errorMessage: 'У вас закончились купленные игры :-('}, 'Понятно');
+    if (!this.stateService.user?.gamesCredit && !testGame) {
+      this.dialogService.popUp(
+        { errorMessage: 'У вас закончились купленные игры :-(' },
+        'Понятно'
+      );
       return;
     }
-    const settings = {...this.form.getRawValue(), testGame }
+    const settings = { ...this.form.getRawValue(), testGame };
     this.loadingService.show();
-    await this.creatorService.generateGame(
-      this.songs,
-      settings
-    ).then(game => this.creatorService.generateTickets(
-      game,
-      settings.rounds,
-      settings.ticketsCount
-    )).finally(() => this.loadingService.hide());
-    this.router.navigate(['/'])
+    await this.creatorService
+      .generateGame(
+        this.songs.map((song) => ({ ...song, history: [] })),
+        settings
+      )
+      .then((game) =>
+        this.creatorService.generateTickets(
+          game,
+          settings.rounds,
+          settings.ticketsCount
+        )
+      )
+      .finally(() => this.loadingService.hide());
+    this.router.navigate(['/']);
   }
 
   playBackground() {

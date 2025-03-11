@@ -14,8 +14,8 @@ export class SongsService {
     return this.apiService.getSongs()
   }
 
-  saveSongs(songs: INewSong[]){
-    return this.apiService.createSong(songs)
-  }
+  // saveSongs(songs: INewSong[]){
+  //   return this.apiService.createSong(songs)
+  // }
 
 }

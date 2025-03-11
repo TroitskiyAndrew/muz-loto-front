@@ -132,8 +132,8 @@ export class ApiService {
       });
   }
 
-  updateSong(song: ISong) {
-    const url = `${environment.backendUrl}/users`;
+  updateSong(song: Partial<ISong>) {
+    const url = `${environment.backendUrl}/songs`;
     return this.http
       .put(url, song)
       .toPromise()
@@ -144,10 +144,10 @@ export class ApiService {
       });
   }
 
-  createSong(song: INewSong | INewSong[]) {
+  createSong(song: INewSong) {
     const url = `${environment.backendUrl}/songs`;
     return this.http
-      .post<INewSong | INewSong[]>(url, song)
+      .post<ISongWithParams>(url, song)
       .toPromise()
       .then(res => res || null)
       .catch((error) => {

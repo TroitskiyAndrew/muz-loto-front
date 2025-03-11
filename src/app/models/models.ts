@@ -32,7 +32,10 @@ export interface ISong {
   youtubeId: string;
   start: number;
   games: string[];
+  owner?: string;
 }
+
+export type ISongForPlayer  = Pick<ISong, 'youtubeId' | 'start' >
 
 export type INewSong  = Omit<ISong, 'id'>
 
@@ -43,6 +46,12 @@ export interface ISongPreferences {
 }
 export type ISongWithParams = ISong & ISongPreferences & {
   history: ISongHistory[]
+}
+
+export type IDisplaySong = Omit<ISongWithParams, 'history'> & {
+  lastUsage: string;
+  usageCount: number;
+  pending: boolean
 }
 
 export interface ISongHistory {

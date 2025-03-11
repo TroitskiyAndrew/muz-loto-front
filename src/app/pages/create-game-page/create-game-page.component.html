@@ -1,6 +1,24 @@
 <form [formGroup]="form">
-  <button class="create-button" color="accent" mat-raised-button type="submit" [disabled]="form.invalid" (click)="createGame()">Создать игру</button>
-  <button class="create-button" color="primary" mat-raised-button type="submit" [disabled]="form.invalid" (click)="createGame(true)">Создать тестовую игру</button>
+  <button
+    class="create-button"
+    color="accent"
+    mat-raised-button
+    type="submit"
+    [disabled]="form.invalid"
+    (click)="createGame()"
+  >
+    Создать игру
+  </button>
+  <button
+    class="create-button"
+    color="primary"
+    mat-raised-button
+    type="submit"
+    [disabled]="form.invalid"
+    (click)="createGame(true)"
+  >
+    Создать тестовую игру
+  </button>
   <div class="settings">
     <div class="settings__main">
       <label>
@@ -24,87 +42,204 @@
       </fieldset>
     </div>
     <div class="settings__rounds" formArrayName="rounds">
-      <div class="settings__rounds__item" *ngFor="let round of rounds.controls; let i = index" [formGroup]="round">
+      <div
+        class="settings__rounds__item"
+        *ngFor="let round of rounds.controls; let i = index"
+        [formGroup]="round"
+      >
         <fieldset>
           <legend>Раунд {{ i + 1 }}</legend>
-          <label>Колонки поля: <input type="number" formControlName="roundFieldColumns" /></label>
-          <label>Ряды поля: <input type="number" formControlName="roundFieldRows" /></label>
-          <label>Колонки билета: <input type="number" formControlName="ticketFieldColumns" /></label>
-          <label>Ряды билета: <input type="number" formControlName="ticketFieldRows" /></label>
-          <label>Иностранные песни: <input type="number" formControlName="notRusSongs" /></label>
-          <label>Победители Линия: <input type="number" formControlName="lineWinners" /></label>
-          <label>Победители Крест: <input type="number" formControlName="crossWinners" /></label>
-          <label>Победители Весь Билет: <input type="number" formControlName="allWinners" /></label>
+          <label
+            >Колонки поля:
+            <input type="number" formControlName="roundFieldColumns"
+          /></label>
+          <label
+            >Ряды поля: <input type="number" formControlName="roundFieldRows"
+          /></label>
+          <label
+            >Колонки билета:
+            <input type="number" formControlName="ticketFieldColumns"
+          /></label>
+          <label
+            >Ряды билета:
+            <input type="number" formControlName="ticketFieldRows"
+          /></label>
+          <label
+            >Иностранные песни:
+            <input type="number" formControlName="notRusSongs"
+          /></label>
+          <label
+            >Победители Линия:
+            <input type="number" formControlName="lineWinners"
+          /></label>
+          <label
+            >Победители Крест:
+            <input type="number" formControlName="crossWinners"
+          /></label>
+          <label
+            >Победители Весь Билет:
+            <input type="number" formControlName="allWinners"
+          /></label>
           <!-- <button type="button" (click)="removeRound(i)">Удалить раунд</button> -->
         </fieldset>
       </div>
     </div>
   </div>
+  <!-- <button type="button" (click)="addRound()">Добавить раунд</button> -->
+</form>
 
-
+<form [formGroup]="songForm">
+  <div class="new-song">
+    <label>
+      Русскоязычная:
+      <mat-checkbox formControlName="rus"></mat-checkbox>
+    </label>
+    <label>
+      Испольнитель:
+      <input formControlName="artist" />
+    </label>
+    <label>
+      Название:
+      <input formControlName="name" />
+    </label>
+    <label>
+      youtubeId:
+      <input formControlName="youtubeId" />
+    </label>
+    <label>
+      Старт:
+      <input type="number" formControlName="start" />
+    </label>
+    <button
+      (click)="playNewSong()"
+      [disabled]="songForm.invalid"
+      mat-icon-button
+    >
+      <mat-icon>play_arrow</mat-icon>
+    </button>
+    <button
+      class="create-button"
+      color="accent"
+      mat-raised-button
+      type="submit"
+      [disabled]="songForm.invalid"
+      (click)="createSong()"
+    >
+      Добавить песню
+    </button>
+  </div>
   <!-- <button type="button" (click)="addRound()">Добавить раунд</button> -->
 </form>
 
 <div class="songs">
-  <table mat-table [dataSource]="dataSource" matSort  class="mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+    <ng-container ngId="state.Service.user?.isAdmin" matColumnDef="pending">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Рассмотрение</th>
+      <td mat-cell *matCellDef="let song">
+        <button *ngIf="song.pending" (click)="acceptSong(song)" mat-icon-button>
+          <mat-icon>check</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
     <ng-container matColumnDef="artist">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>
         <div class="filter-header">
           Исполнитель
-          <input type="text" (click)="eventHandler($event)" (input)="filterByArtist($event)">
+          <input
+            type="text"
+            (click)="eventHandler($event)"
+            (input)="filterByArtist($event)"
+          />
         </div>
       </th>
-      <td mat-cell *matCellDef="let song"> {{ song.artist }} </td>
+      <td mat-cell *matCellDef="let song">{{ song.artist }}</td>
     </ng-container>
 
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>
         <div class="filter-header">
           Название
-          <input type="text" (click)="eventHandler($event)" (input)="filterByName($event)">
+          <input
+            type="text"
+            (click)="eventHandler($event)"
+            (input)="filterByName($event)"
+          />
         </div>
-       </th>
-      <td mat-cell *matCellDef="let song"> {{ song.name }} </td>
+      </th>
+      <td mat-cell *matCellDef="let song">{{ song.name }}</td>
     </ng-container>
 
     <ng-container matColumnDef="rus">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Рус </th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Рус</th>
       <td mat-cell *matCellDef="let song">
         <mat-checkbox [(ngModel)]="song.rus" disabled></mat-checkbox>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="usageCount">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Игр</th>
+      <td mat-cell *matCellDef="let song">{{ song.usageCount }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="lastUsage">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        <div class="filter-header">
+          Последняя игра
+          <input
+            type="text"
+            (click)="eventHandler($event)"
+            (input)="filterByUsage($event)"
+          />
+        </div>
+      </th>
+      <td mat-cell *matCellDef="let song">{{ song.lastUsage }}</td>
     </ng-container>
 
     <ng-container matColumnDef="priority">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Приоритет </th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Приоритет</th>
       <td mat-cell *matCellDef="let song">
         <mat-checkbox [(ngModel)]="song.priority"></mat-checkbox>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="disabled">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Исключить </th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Исключить</th>
       <td mat-cell *matCellDef="let song">
         <mat-checkbox [(ngModel)]="song.disabled"></mat-checkbox>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="round">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Поместить в раунд </th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        Поместить в раунд
+      </th>
       <td mat-cell *matCellDef="let song">
-        <input [id]="song.id + 'round'" type="number" min="1" max="2" style="width: 4ch;" [(ngModel)]="song.round">
-       </td>
+        <input
+          [id]="song.id + 'round'"
+          type="number"
+          min="1"
+          max="2"
+          style="width: 4ch"
+          [(ngModel)]="song.round"
+        />
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="play">
-      <th mat-header-cell *matHeaderCellDef > Послушать </th>
+      <th mat-header-cell *matHeaderCellDef>Послушать</th>
       <td mat-cell *matCellDef="let song">
         <button (click)="playSong(song)" mat-icon-button>
           <mat-icon>play_arrow</mat-icon>
         </button>
-       </td>
+      </td>
     </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns" ></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr
+      mat-row
+      *matRowDef="let row; columns: displayedColumns"
+      [ngClass]="{ pending: row.pending }"
+    ></tr>
   </table>
-
 </div>

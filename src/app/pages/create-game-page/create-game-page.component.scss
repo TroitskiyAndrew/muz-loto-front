@@ -49,3 +49,19 @@ form {
 .create-button {
   width: max-content;
 }
+
+.filter-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.new-song {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pending {
+  background-color: rgb(255, 255, 0);
+}
