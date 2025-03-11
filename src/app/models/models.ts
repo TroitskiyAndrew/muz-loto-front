@@ -79,11 +79,12 @@ export interface IGameResults {
   gameWinners: number[];
   wastedTickets: number[];
   rounds: IRoundResults[];
+  currentRoundIndex: number;
+  currentStep: number;
 }
 
 export interface IRoundResults {
-  playedSongs: string[],
-  step: number;
+  playedSongs: string[]
 }
 
 export interface IRound {
@@ -139,7 +140,7 @@ export interface SocketMessage<T> {
 }
 
 export interface TicketsMessagePayload {
-  add: boolean,
+  exclude: boolean,
   tickets: number[];
 }
 

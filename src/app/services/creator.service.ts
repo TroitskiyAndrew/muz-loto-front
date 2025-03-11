@@ -11,7 +11,7 @@ import {
   INewGame,
 } from '../models/models';
 import { StateService } from './state.service';
-import { DEFAULT_BACKGROUND_MUSIC } from '../constants/constants';
+import { DEFAULT_BACKGROUND_MUSIC, getDefaultResults } from '../constants/constants';
 import { SongsService } from './songs.service';
 import { ApiService } from './api.service';
 
@@ -102,13 +102,7 @@ export class CreatorService {
       backgroundMusic: settings.backgroundMusic,
       code: this.generateCode(),
       testGame: settings.testGame,
-      results: {
-        lastStart: null,
-        wantedWinner: Winner.Line,
-        gameWinners: [],
-        wastedTickets: [],
-        rounds: [],
-      },
+      results: getDefaultResults(settings.rounds.length),
     };
     const createdGame = await this.apiService.createGame(game);
     if(!createdGame){

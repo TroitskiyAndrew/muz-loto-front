@@ -8,6 +8,7 @@ import { tick } from '@angular/core/testing';
 import { CreatorService } from '../../services/creator.service';
 import { DialogService } from '../../services/dialog.service';
 import { FormControl, Validators } from '@angular/forms';
+import { getDefaultResults } from '../../constants/constants';
 
 @Component({
   selector: 'app-games-page',
@@ -73,8 +74,8 @@ export class GamesPageComponent {
   isResetDisabled(game: IGame) {
     return (
       !game.results.lastStart ||
-      game.results.rounds.length === 0 ||
-      game.results.rounds[0].step > 5
+      game.results.currentRoundIndex > 0 ||
+      game.results.currentStep > 5
     );
   }
 
@@ -82,13 +83,7 @@ export class GamesPageComponent {
     if (this.isResetDisabled(game)) {
       return;
     }
-    const results = {
-      lastStart: null,
-      wantedWinner: Winner.Line,
-      gameWinners: [],
-      wastedTickets: [],
-      rounds: [],
-    };
+    const results = getDefaultResults(game.rounds.length);
     this.loadingService.show();
     await this.apiService.updateGame({ id: game.id, results });
     this.loadingService.hide();
