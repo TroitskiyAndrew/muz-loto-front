@@ -56,7 +56,7 @@ export class AuthService {
             const password = passwordField.control.value as string;
             this.loadingService.show();
             const hashedPassword = await this.hashPassword(password);
-            const logo = 'weli';
+            const logo = 'global';
             const backgroundMusic = DEFAULT_BACKGROUND_MUSIC;
             return await this.apiService.createUser({email, hashedPassword, logo, backgroundMusic}).then(this.handleAuthResponse.bind(this)).finally(() => this.loadingService.hide());
           },
