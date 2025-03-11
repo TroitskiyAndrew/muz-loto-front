@@ -47,6 +47,7 @@ export class CreateGamePageComponent implements OnDestroy {
   form: FormGroup;
   songForm: FormGroup;
   sub: Subscription;
+  isBackGroundPlaying = false;
 
   constructor(
     private creatorService: CreatorService,
@@ -55,7 +56,7 @@ export class CreateGamePageComponent implements OnDestroy {
     private playerService: PlayerService,
     private fb: FormBuilder,
     private apiService: ApiService,
-    private stateService: StateService,
+    public stateService: StateService,
     private router: Router,
     private dialogService: DialogService
   ) {
@@ -276,7 +277,12 @@ export class CreateGamePageComponent implements OnDestroy {
   }
 
   playBackground() {
-    this.playerService.play(this.form.value.backgroundMusic);
+    this.playerService.playBackGround(this.form.value.backgroundMusic);
+    this.isBackGroundPlaying = true;
+  }
+  stopBackground() {
+    this.playerService.stopBackGround();
+    this.isBackGroundPlaying = false;
   }
 
   ngOnDestroy(): void {

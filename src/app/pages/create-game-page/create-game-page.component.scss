@@ -59,7 +59,14 @@ form {
   display: flex;
   align-items: center;
   column-gap: 10px;
-    flex-wrap: wrap;
+  padding: 10px;
+  border: 1px solid black;
+  &__group {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    align-items: flex-end;
+  }
 }
 
 .pending {

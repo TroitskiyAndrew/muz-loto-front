@@ -36,8 +36,20 @@
           Старт (секунды):
           <input type="number" formControlName="start" />
         </label>
-        <button (click)="playBackground()" mat-icon-button>
+        <button
+          *ngIf="!isBackGroundPlaying"
+          (click)="playBackground()"
+          mat-icon-button
+          [disabled]="form.controls['backgroundMusic'].invalid"
+        >
           <mat-icon>play_arrow</mat-icon>
+        </button>
+        <button
+          *ngIf="isBackGroundPlaying"
+          (click)="stopBackground()"
+          mat-icon-button
+        >
+          <mat-icon>pause</mat-icon>
         </button>
       </fieldset>
     </div>
@@ -90,33 +102,39 @@
 
 <form [formGroup]="songForm">
   <div class="new-song">
-    <label>
-      Русскоязычная:
-      <mat-checkbox formControlName="rus"></mat-checkbox>
-    </label>
-    <label>
-      Испольнитель:
-      <input formControlName="artist" />
-    </label>
-    <label>
-      Название:
-      <input formControlName="name" />
-    </label>
-    <label>
-      youtubeId:
-      <input formControlName="youtubeId" />
-    </label>
-    <label>
-      Старт:
-      <input type="number" formControlName="start" />
-    </label>
+    <div class="new-song__group">
+      <label>
+        Русскоязычная:
+        <mat-checkbox formControlName="rus"></mat-checkbox>
+      </label>
+    </div>
+    <div class="new-song__group">
+      <label>
+        Испольнитель:
+        <input formControlName="artist" />
+      </label>
+      <label>
+        Название:
+        <input formControlName="name" />
+      </label>
+    </div>
+    <div class="new-song__group">
+      <label>
+        youtubeId:
+        <input formControlName="youtubeId" />
+      </label>
+      <label>
+        Старт:
+        <input type="number" formControlName="start" />
+      </label>
+    </div>
     <button
-      (click)="playNewSong()"
-      [disabled]="songForm.invalid"
-      mat-icon-button
-    >
-      <mat-icon>play_arrow</mat-icon>
-    </button>
+        (click)="playNewSong()"
+        [disabled]="songForm.controls['youtubeId'].invalid || songForm.controls['start'].invalid"
+        mat-icon-button
+      >
+        <mat-icon>play_arrow</mat-icon>
+      </button>
     <button
       class="create-button"
       color="accent"
@@ -133,9 +151,9 @@
 
 <div class="songs">
   <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
-    <ng-container ngId="state.Service.user?.isAdmin" matColumnDef="pending">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Рассмотрение</th>
-      <td mat-cell *matCellDef="let song">
+    <ng-container matColumnDef="pending">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header [ngClass]="{ 'hidden': !stateService.user?.isAdmin }">Рассмотрение</th>
+      <td mat-cell *matCellDef="let song" [ngClass]="{ 'hidden': !stateService.user?.isAdmin }">
         <button *ngIf="song.pending" (click)="acceptSong(song)" mat-icon-button>
           <mat-icon>check</mat-icon>
         </button>
@@ -227,7 +245,7 @@
     </ng-container>
 
     <ng-container matColumnDef="play">
-      <th mat-header-cell *matHeaderCellDef>Послушать</th>
+      <th mat-header-cell *matHeaderCellDef>Посмотреть</th>
       <td mat-cell *matCellDef="let song">
         <button (click)="playSong(song)" mat-icon-button>
           <mat-icon>play_arrow</mat-icon>
