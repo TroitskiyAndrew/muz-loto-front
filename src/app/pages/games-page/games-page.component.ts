@@ -75,11 +75,14 @@ export class GamesPageComponent implements OnDestroy {
   }
 
   isResetDisabled(game: IGame) {
-    return (
-      !game.results.lastStart ||
-      game.results.currentRoundIndex > 0 ||
-      game.results.currentStep > 5
-    );
+    if(!game.results.lastStart){
+      return true
+    }
+    if(game.testGame){
+      return false;
+    }
+    return game.results.currentRoundIndex > 0 ||
+    game.results.currentStep > 5;
   }
 
   async resetResults(game: IGame) {
