@@ -16,6 +16,7 @@ import {
   DEFAULT_BACKGROUND_MUSIC,
   DELAY_BEFORE_PLAYING,
 } from '../../constants/constants';
+import { GameService } from '../../services/game.service';
 
 @Component({
   selector: 'app-player',
@@ -36,7 +37,7 @@ export class PlayerComponent implements  OnDestroy {
     private el: ElementRef,
     private renderer: Renderer2,
     private playerService: PlayerService,
-    private stateService: StateService
+    private gameService: GameService
   ) {
     this.sub = this.playerService.initPlayers$.subscribe(() => {
       this.init();
@@ -76,6 +77,7 @@ export class PlayerComponent implements  OnDestroy {
     this.sub.unsubscribe();
     this.playerService.$initMain.next(false);
     this.playerService.$initBackGround.next(false);
+    this.gameService.sendBlockStopStepMessage(true);
   }
 
   private initPlayer() {
@@ -156,6 +158,7 @@ export class PlayerComponent implements  OnDestroy {
 
   private play(video: ISongForPlayer) {
     this.block = true;
+    this.gameService.sendBlockStopStepMessage(true);
     (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex =
       '100';
     const { youtubeId, start } = video;
@@ -164,6 +167,7 @@ export class PlayerComponent implements  OnDestroy {
     setTimeout(
       () => {
         this.block = false;
+        this.gameService.sendBlockStopStepMessage(false);
       },
       this.playerService.gameMode ? DELAY_BEFORE_PLAYING + 2000 : 1000
     );

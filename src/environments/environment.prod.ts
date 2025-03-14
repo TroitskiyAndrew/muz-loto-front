@@ -5,4 +5,6 @@ export const environment = {
   videoStepDuration: 100,
   backgroundVolume: 30,
   backendUrl: 'https://muz-loto-back.onrender.com',
+  simulation: false,
+  silentMode: false,
 };

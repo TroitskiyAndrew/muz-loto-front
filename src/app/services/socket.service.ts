@@ -126,7 +126,9 @@ export class SocketService {
     this.sendMessage<GameMessagePayload>({ type: SocketMessageType.Game,  data: { type: GameMessageType.ChangeTickets, newPlayingTickets } });
   }
 
-
+  blockStopStep(block: boolean) {
+    this.sendMessage<GameMessagePayload>({ type: SocketMessageType.Game,  data: { type: GameMessageType.BlockStopStep, block } });
+  }
 
 
 

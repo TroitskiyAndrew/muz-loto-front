@@ -46,37 +46,11 @@ export class RunPageComponent implements OnDestroy {
   finishStep() {
     this.gameService.sendFinishStepMessage(false);
   }
-  startRound() {
-    const roundField = {
-      id: 'roundIndex',
-      type: 'number',
-      label: '',
-      control: new FormControl(this.gameService.results.currentRoundIndex + 1, [
-        Validators.required,
-        Validators.min(1),
-        Validators.max(this.gameService.game.rounds.length),
-      ]),
-    };
-    this.dialogService.init({
-      message: 'Какой раунд начинаем?',
-      fields: [roundField],
-      buttons: [
-        {
-          label: 'Ок',
-          disabled: () => roundField.control.invalid,
-          action: () =>
-            this.gameService.sendStartRoundMessage(
-              Number(roundField.control.value) - 1
-            ),
-        },
-        {
-          label: 'Выход',
-          disabled: () => false,
-          action: () => null,
-          class: 'cancel',
-        },
-      ],
-    });
+  startRound(roundIndex: number) {
+    if(this.gameService.isRoundFinished(this.gameService.game, roundIndex)){
+      return;
+    }
+    this.gameService.sendStartRoundMessage(roundIndex);
   }
 
   stopRound() {

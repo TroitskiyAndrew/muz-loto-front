@@ -114,7 +114,6 @@ export interface IGameResults {
   currentRoundIndex: number;
   currentStep: number;
   stepWinners: number[];
-  blockActions: boolean;
 }
 
 export interface IRoundResults {
@@ -188,6 +187,7 @@ export enum GameMessageType {
   AnswerWinners,
   SubmitWinners,
   ChangeTickets,
+  BlockStopStep
 }
 
 export type GameMessagePayload =
@@ -202,6 +202,7 @@ export type GameMessagePayload =
   | { type: GameMessageType.AnswerPlayingTicketsCount; count: number }
   | { type: GameMessageType.StartRound; roundIndex: number }
   | { type: GameMessageType.StopRound; next: boolean }
+  | { type: GameMessageType.BlockStopStep; block: boolean }
   | { type: GameMessageType.ChangeTickets, newPlayingTickets: number[] }
   | ISubmitWinnersResultMessagePayload
   | IStepResultsMessagePayload;

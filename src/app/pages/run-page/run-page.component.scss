@@ -1,12 +1,25 @@
 .controls {
   display: flex;
-    flex-direction: column;
-    align-items: center;
-    row-gap: 40px;
-    height: 100%;
-    justify-content: center;
-    &__group{
-      display: flex;
-      column-gap: 20px;
-    }
+  flex-direction: column;
+  align-items: center;
+  row-gap: 40px;
+  height: 100%;
+  justify-content: center;
+  .rounds{
+    display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: 40px;
+  }
+  &__group {
+    display: flex;
+    column-gap: 20px;
+  }
+
+  .step-button{
+    height: 300px;
+    width: 300px;
+    font-size: 48px;
+    font-weight: 500;
+  }
 }

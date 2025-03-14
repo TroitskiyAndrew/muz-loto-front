@@ -5,4 +5,6 @@ export const environment = {
   videoStepDuration: 100,
   backgroundVolume: 30,
   backendUrl: 'http://localhost:3000',
+  simulation: false,
+  silentMode: false,
 };

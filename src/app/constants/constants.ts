@@ -17,7 +17,6 @@ export function getDefaultResults(roundsCount: number): IGameResults {
     currentRoundIndex: 0,
     currentStep: 0,
     stepWinners:[],
-    blockActions: false,
   }
 }
 

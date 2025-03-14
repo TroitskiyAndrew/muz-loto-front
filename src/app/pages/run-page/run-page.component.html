@@ -1,10 +1,12 @@
 <div *ngIf="gameService.game" class="controls">
-  <button *ngIf="gameService.playingMode && !gameService.isSongPlaying" color="accent" mat-raised-button  (click)="startStep()">Следующая песня</button>
-  <button *ngIf="gameService.playingMode && gameService.isSongPlaying" class="yellow" mat-raised-button   (click)="finishStep()">Остановить песню</button>
-  <button *ngIf="!gameService.playingMode" color="primary" mat-raised-button   (click)="startRound()">Запустить раунд</button>
-  <button *ngIf="gameService.playingMode" color="warn" mat-raised-button   (click)="stopRound()">Закончить раунд</button>
+  <button class="step-button" *ngIf="gameService.playingMode && !gameService.isSongPlaying" color="accent" mat-fab  (click)="startStep()" [disabled]="gameService.blockStartStep">Следующая песня</button>
+  <button class="step-button" *ngIf="gameService.playingMode && gameService.isSongPlaying" color="accent" mat-fab   (click)="finishStep()" [disabled]="gameService.blockStopStep">Остановить песню</button>
+  <div *ngIf="!gameService.playingMode" class="rounds">
+    <button *ngFor="let round of gameService.game.rounds; let i = index" class="round" color="primary" mat-raised-button (click)="startRound(i)" [disabled]="gameService.isRoundFinished(gameService.game, i)"> {{round.name}}</button>
+  </div>
   <div class="controls__group">
     <button class="green" mat-raised-button  (click)="addTickets()">Вернуть билеты в игру</button>
     <button class="red" mat-raised-button  (click)="excludeTickets()"> Билеты не играют</button>
   </div>
+  <button *ngIf="gameService.playingMode" color="warn" mat-raised-button   (click)="stopRound()" [disabled]="gameService.isSongPlaying">Закончить раунд</button>
 </div>

@@ -32,6 +32,7 @@ import {
   getDefaultResults,
 } from '../constants/constants';
 import { FormControl, Validators } from '@angular/forms';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -41,7 +42,8 @@ export class GameService implements OnDestroy {
   tickets: ITicket[] = [];
   playingMode = false;
   isFront = false;
-  blockActions = false;
+  blockStartStep = false;
+  blockStopStep = false;
   roundTickets: IRoundTicket[] = [];
   selectedSong: IRoundSong | null = null;
   selectedSongId = '';
@@ -53,8 +55,9 @@ export class GameService implements OnDestroy {
   isSongPlaying = false;
   isDialogOpen = false;
 
-  silentMode = true;
-  simulation = false;
+
+  silentMode = environment.silentMode;
+  simulation = environment.simulation;
   simulationAttempt = 1;
   simulationCount = 10;
 
@@ -76,7 +79,8 @@ export class GameService implements OnDestroy {
     this.isDialogOpen = false;
     this.isFirstStep = true;
     this.playingMode = false;
-    this.blockActions = false;
+    this.blockStartStep = false;
+    this.isSongPlaying = false;
     const game =
       params.game ?? (await this.apiService.getGame(params.code || ''));
     if (!game) {
@@ -99,7 +103,7 @@ export class GameService implements OnDestroy {
             if(!this.isFront){
               this.askPlayingTicketsCount();
             }
-            this.blockActions = true;
+            this.blockStartStep = true;
             break;
           case GameMessageType.AnswerPlayingTicketsCount:
             this.answerPlayingTicketsChanges(data.count);
@@ -130,6 +134,9 @@ export class GameService implements OnDestroy {
           case GameMessageType.FinishStep:
             this.finishStepChanges();
             break;
+          case GameMessageType.BlockStopStep:
+            this.blockStopStep = data.block;
+            break;
 
           default:
             break;
@@ -146,7 +153,7 @@ export class GameService implements OnDestroy {
   }
 
   private askPlayingTicketsCount() {
-    this.blockActions = true;
+    this.blockStartStep = true;
     if (this.isDialogOpen) {
       return;
     }
@@ -190,7 +197,7 @@ export class GameService implements OnDestroy {
         } else if (playersCount) {
           this.sendPlayingTicketsMessage(playersCount);
         }
-        this.blockActions = false;
+        this.blockStartStep = false;
       });
   }
 
@@ -201,7 +208,7 @@ export class GameService implements OnDestroy {
   }
 
   answerPlayingTicketsChanges(result: number) {
-    this.blockActions = false;
+    this.blockStartStep = false;
     this.playingTicketsNumbers = this.tickets
       .map((ticket) => ticket.number)
       .filter((number) => number <= result);
@@ -219,7 +226,7 @@ export class GameService implements OnDestroy {
     this.isDialogOpen = true;
   }
   private askWinner() {
-    this.blockActions = true;
+    this.blockStartStep = true;
     if (this.isDialogOpen) {
       return;
     }
@@ -266,7 +273,7 @@ export class GameService implements OnDestroy {
   }
 
   answerWinnersChanges() {
-    this.blockActions = false;
+    this.blockStartStep = false;
   }
 
   answerWinners(result: boolean) {
@@ -349,7 +356,7 @@ export class GameService implements OnDestroy {
     if (roundIndex >= this.game.rounds.length) {
       return false;
     }
-    this.blockActions = false;
+    this.blockStartStep = false;
     this.results.currentRoundIndex = roundIndex;
     this.roundTickets = this.tickets.map((ticket) => {
       return {
@@ -397,7 +404,7 @@ export class GameService implements OnDestroy {
   }
 
   startStepChanges(results: IStepResults) {
-    this.blockActions = true;
+    this.blockStartStep = true;
     this.isSongPlaying = true;
     if (this.selectedSong) {
       this.selectedSong.class = '';
@@ -418,7 +425,7 @@ export class GameService implements OnDestroy {
   }
 
   makeStep() {
-    if (this.blockActions) {
+    if (this.blockStartStep) {
       return;
     }
     if (this.results.currentStep === this.roundSongs.length) {
@@ -460,6 +467,12 @@ export class GameService implements OnDestroy {
       );
     }
     this.socketService.playSong(this.selectedSongId, randomAvailableSongs);
+    this.sendBlockStopStepMessage(true)
+  }
+
+  sendBlockStopStepMessage(block: boolean){
+    this.socketService.blockStopStep(block);
+    this.blockStopStep = block;
   }
 
   selectSong(): string {
@@ -637,7 +650,7 @@ export class GameService implements OnDestroy {
   finishStepChanges() {
     setTimeout(() => {
       this.isSongPlaying = false;
-      this.blockActions = false;
+      this.blockStartStep = false;
     }, 50);
 
     this.selectedSong = this.roundSongsMap.get(
