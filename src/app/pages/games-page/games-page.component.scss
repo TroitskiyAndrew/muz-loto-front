@@ -6,14 +6,19 @@
 }
 
 .game {
-  position: relative;
   display: flex;
-  align-items: center;
-  column-gap: 20px;
+  flex-direction: column;
+  row-gap: 20px;
   margin: 0 auto;
   padding: 20px;
   border: 1px solid black;
   border-radius: 10px;
+
+  &__main {
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+  }
 
   &.test-game {
     background-color: rgb(233, 231, 231);
@@ -31,9 +36,8 @@
       display: flex;
       column-gap: 5px;
     }
-    &__last {
-      flex-direction: column;
-      row-gap: 3px;
+    &__results {
+      column-gap: 5px;
     }
     &__value {
       font-weight: 900;
@@ -136,8 +140,4 @@
   page-break-after: always;
 }
 
-.test {
-  position: absolute;
-  top: 0;
-  color: red;
-}
+

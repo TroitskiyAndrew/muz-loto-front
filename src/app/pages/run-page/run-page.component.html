@@ -1,11 +1,8 @@
-<div class="controls">
-  <button color="accent" mat-raised-button  (click)="nextSong()">Следующая песня</button>
-  <button  class="yellow" mat-raised-button   (click)="stopSong()">Остановить песню</button>
-  <button  color="primary" mat-raised-button   (click)="startGame()">Запустить раунд</button>
-  <div class="controls__group">
-    <button class="green" mat-raised-button  (click)="sendAnswer(true)">Есть победитель</button>
-    <button class="red" mat-raised-button  (click)="sendAnswer(false)">Нет победителя</button>
-  </div>
+<div *ngIf="gameService.game" class="controls">
+  <button *ngIf="gameService.playingMode && !gameService.isSongPlaying" color="accent" mat-raised-button  (click)="startStep()">Следующая песня</button>
+  <button *ngIf="gameService.playingMode && gameService.isSongPlaying" class="yellow" mat-raised-button   (click)="finishStep()">Остановить песню</button>
+  <button *ngIf="!gameService.playingMode" color="primary" mat-raised-button   (click)="startRound()">Запустить раунд</button>
+  <button *ngIf="gameService.playingMode" color="warn" mat-raised-button   (click)="stopRound()">Закончить раунд</button>
   <div class="controls__group">
     <button class="green" mat-raised-button  (click)="addTickets()">Вернуть билеты в игру</button>
     <button class="red" mat-raised-button  (click)="excludeTickets()"> Билеты не играют</button>

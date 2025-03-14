@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomePageComponent } from './pages/home-page/home-page.component';
-import { GameComponent } from './components/game/game.component';
 import { CreateGamePageComponent } from './pages/create-game-page/create-game-page.component';
 import { GamesPageComponent } from './pages/games-page/games-page.component';
 import { RunPageComponent } from './pages/run-page/run-page.component';
+import { GamePageComponent } from './pages/game-page/game-page.component';
 
 const routes: Routes = [
   {
@@ -14,11 +14,11 @@ const routes: Routes = [
   },
   {
     path: 'game',
-    component: GameComponent
+    component: GamePageComponent
   },
   {
     path: 'game/:code',
-    component: GameComponent
+    component: GamePageComponent
   },
   {
     path: 'runGame/:code',

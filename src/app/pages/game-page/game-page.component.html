@@ -1,0 +1,18 @@
+<div class="game">
+  <div *ngIf="!gameService.playingMode" class="game__start" (click)="startRound()">
+    <img src="assets/logo.png" alt="">
+  </div>
+  <div *ngIf="gameService.playingMode" class="game__round" (click)="handleClick($event)"
+    (contextmenu)="rightClick($event)">
+    <div class="game__round__name"> {{gameService.playingRound.name}}</div>
+    <div class="game__round__field">
+      <app-field [round]="gameService.playingRound"></app-field>
+
+    </div>
+    <div class="game__round__last-song">
+      <span *ngIf="gameService.selectedSong"> {{ [gameService.selectedSong.artist, gameService.selectedSong.name].join(' - ') }}</span>
+    </div>
+  </div>
+</div>
+<img *ngIf="game" class="logo" [src]="'assets/' + gameService.game.logo + '.png'" alt="">
+<app-player></app-player>

@@ -11,10 +11,12 @@ import { DialogData, IDialogButton } from '../../models/models';
 export class DialogComponent implements AfterViewInit {
 
   errorMessage = '';
+  dialogId = 0;
 
   dialogData: DialogData = { buttons: [{label: 'Ok', action: Promise.resolve, disabled: () => false}]};
 
-  constructor(public dialogRef: MatDialogRef<DialogComponent>, @Inject(MAT_DIALOG_DATA) public data: DialogData) {
+  constructor(public dialogRef: MatDialogRef<DialogComponent>, @Inject(MAT_DIALOG_DATA) public data: DialogData & {dialogId: number}) {
+    this.dialogId = data.dialogId;
     this.dialogData = data;
     if(this.dialogData.errorMessage){
       this.errorMessage = this.dialogData.errorMessage;
@@ -24,7 +26,7 @@ export class DialogComponent implements AfterViewInit {
   ngAfterViewInit(): void {
 
     if(this.dialogData.init){
-      this.dialogData.init();
+      this.dialogData.init(this.dialogId);
     }
   }
 

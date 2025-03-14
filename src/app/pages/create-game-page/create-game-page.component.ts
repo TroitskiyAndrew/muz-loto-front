@@ -77,6 +77,7 @@ export class CreateGamePageComponent implements OnDestroy {
         youtubeId: ['PJxxfilLnGI', Validators.required],
         start: [930, Validators.required],
       }),
+      comment: [''],
       rounds: this.fb.array([
         this.fb.group({
           roundFieldColumns: [
@@ -146,6 +147,7 @@ export class CreateGamePageComponent implements OnDestroy {
   }
 
   async init() {
+    await this.playerService.initPlayers();
     this.songs = ((await this.songsService.getSongs()) || []).map(this.mapSong);
     this.dataSource = new MatTableDataSource<IDisplaySong>(this.songs);
     this.dataSource.sort = this.sort;

@@ -10,6 +10,7 @@ import { DialogService } from '../../services/dialog.service';
 import { FormControl, Validators } from '@angular/forms';
 import { getDefaultResults } from '../../constants/constants';
 import { Subscription } from 'rxjs';
+import { GameService } from '../../services/game.service';
 
 @Component({
   selector: 'app-games-page',
@@ -36,7 +37,8 @@ export class GamesPageComponent implements OnDestroy {
     public stateService: StateService,
     private router: Router,
     private creatorService: CreatorService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    public gameService: GameService,
   ) {
     this.loadingService.show();
     this.sub = this.stateService.$init.subscribe((init: boolean) => {
@@ -53,11 +55,14 @@ export class GamesPageComponent implements OnDestroy {
     });
   }
 
-  async printTickets(gameId: string, logo: string) {
+  async printTickets(game: IGame) {
+    if(this.gameService.isGameFinished(game)){
+      return;
+    }
     this.loadingService.show();
-    this.ticketLogo = logo;
-    this.gameId = gameId;
-    this.tickets = await this.getTickets(gameId);
+    this.ticketLogo = game.logo;
+    this.gameId = game.id;
+    this.tickets = await this.getTickets(game.id);
     console.log(this.tickets);
     this.loadingService.hide();
     this.showTickets = true;
@@ -67,11 +72,17 @@ export class GamesPageComponent implements OnDestroy {
     return this.apiService.getTickets(gameId);
   }
 
-  runGame(code: string) {
-    this.router.navigate(['runGame', code]);
+  runGame(game: IGame) {
+    if(this.gameService.isGameFinished(game)){
+      return;
+    }
+    this.router.navigate(['runGame', game.code]);
   }
-  startGame(code: string) {
-    this.router.navigate(['game', code]);
+  startGame(game: IGame) {
+    if(this.gameService.isGameFinished(game)){
+      return;
+    }
+    this.router.navigate(['game', game.code], {state: {game}});
   }
 
   isResetDisabled(game: IGame) {
@@ -79,6 +90,9 @@ export class GamesPageComponent implements OnDestroy {
       return true
     }
     if(game.testGame){
+      return false;
+    }
+    if(this.stateService.user?.isAdmin){
       return false;
     }
     return game.results.currentRoundIndex > 0 ||
@@ -97,6 +111,9 @@ export class GamesPageComponent implements OnDestroy {
   }
 
   async addTickets(game: IGame) {
+    if(this.gameService.isGameFinished(game)){
+      return;
+    }
     const addField = {
       id: 'code',
       type: 'number',
@@ -151,6 +168,10 @@ export class GamesPageComponent implements OnDestroy {
     this.games = this.games.filter(game => game.id !== gameId);
     this.loadingService.hide();
 
+  }
+
+  getRoundResults(game: IGame, roundIndex: number){
+    return game.results.rounds[roundIndex]?.playedSongs.length + '/' + game.rounds[roundIndex].field.flat().length;
   }
 
   ngOnDestroy(): void {

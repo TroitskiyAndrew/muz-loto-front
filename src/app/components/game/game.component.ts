@@ -2,7 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import {
   IGameSettings,
   IGame,
-  IPlayingTicket,
+  IRoundTicket,
   IRound,
   IRoundSong,
   ITicket,
@@ -47,13 +47,12 @@ export class GameComponent implements OnDestroy{
   errors = 0;
   game!: IGame;
   currentRound!: IRound;
-  currentRoundTickets: IPlayingTicket[] = [];
+  currentRoundTickets: IRoundTicket[] = [];
   selectedSong: IRoundSong | null = null;
   playedSongs: string[] = [];
   currentWinners: Set<number> = new Set();
   simulation = false;
   tickets: ITicket[] = [];
-  $init = new Subject<boolean>();
   block = false;
   testPeriod = 15;
   isPlayed = false;
@@ -75,7 +74,6 @@ export class GameComponent implements OnDestroy{
   }
 
   async init(){
-    this.stateService.showHome = false;
     let code = this.route.snapshot.params['code'];
     if(!code){
       const codeField = { id: 'code', label: '', control: new FormControl('', [Validators.required]) };
@@ -141,12 +139,12 @@ export class GameComponent implements OnDestroy{
       this.dialogService.popUp({message: `Это тестовая игра. Вы сможете сделать ${this.testPeriod} ходов`});
     }
     this.playerService.gameMode = true;
-    this.playerService.playBackGround(this.game.backgroundMusic);
+
     this.socketService.onMessage<boolean | null>(SocketMessageType.Player, ({data}) => {
       if(data === true ){
         this.nextSong();
       } else if(data === false && this.block){
-        this.playerService.stop();
+        this.playerService.stop(false);
       }
     });
     this.socketService.onMessage<TicketsMessagePayload>(SocketMessageType.Tickets, ({data}) => {
@@ -165,7 +163,6 @@ export class GameComponent implements OnDestroy{
         this.startRound();
       }
     });
-    this.$init.next(true)
   }
 
   simulateGames(count: number) {
@@ -242,9 +239,6 @@ export class GameComponent implements OnDestroy{
       return;
     }
     this.block = true;
-    if (!this.playerService.$init.value) {
-      return;
-    }
     if (this.playedSongs.length === this.roundSongs.length){
       this.isGameStarted = false;
       this.game.results.currentRoundIndex++
@@ -274,11 +268,12 @@ export class GameComponent implements OnDestroy{
 
   handleStart() {
     console.log(this.game.results.wastedTickets);
+    // ToDo Перенести реакцию на сообщения о песне на фронте
     if(!this.isPlayed){
       this.markAsPlayed();
     }
     this.showName = false;
-    if(this.game.testGame && this.game.results.currentStep === this.testPeriod){
+    if (this.game.testGame && this.game.results.currentStep === this.testPeriod){
       this.dialogService.popUp({message: 'Это была тестовая игра'});
       this.router.navigate(['']);
       return;
@@ -302,7 +297,7 @@ export class GameComponent implements OnDestroy{
       clearInterval(randomizerInterval);
       this.roundSongs.forEach((song) => (song.class = ''));
       this.selectedSong!.class = 'green';
-    }, this.simulation ? 0 : environment.playerDelay * 1000 - 500);
+    }, this.simulation ? 0 : (environment.playerDelay * 1000 - 500));
     this.currentWinners = this.getWinners(selectedSongId);
     this.playedSongs.push(selectedSongId);
   }
@@ -411,7 +406,7 @@ export class GameComponent implements OnDestroy{
     return null
   }
 
-  trySongInTicket(songId: string, ticket: IPlayingTicket, playedSongs: string[]): boolean {
+  trySongInTicket(songId: string, ticket: IRoundTicket, playedSongs: string[]): boolean {
     let result = false;
     const linesSimulation = ticket.field.map(
       (row) => new Set(row.filter(song => !playedSongs.includes(song.youtubeId)).map((song) => song.youtubeId))
@@ -444,24 +439,26 @@ export class GameComponent implements OnDestroy{
   }
 
 
-  showExample() {
-    const video = {
-      name: '',
-      duration: 8,
-      number: 1,
-      start: 0,
-      played: false,
-      class: '',
-      youtubeId: 'Hy8kmNEo1i8',
-    };
+  // showExample() {
+  //   const video = {
+  //     name: '',
+  //     duration: 8,
+  //     number: 1,
+  //     start: 0,
+  //     played: false,
+  //     class: '',
+  //     youtubeId: 'Hy8kmNEo1i8',
+  //   };
 
-    // this.playerService.$video.next(video);
-  }
+  //   // this.playerService.$video.next(video);
+  // }
 
   ngOnDestroy(): void {
     this.playerService.gameMode = false;
-    this.stateService.showHome = true;
     this.playerService.stopBackGround();
+    this.socketService.unsubscribe(SocketMessageType.Player)
+    this.socketService.unsubscribe(SocketMessageType.Tickets)
+    this.socketService.unsubscribe(SocketMessageType.Game)
   }
 
 }

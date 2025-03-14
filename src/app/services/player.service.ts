@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { IBackgroundMusic, ISong, ISongForPlayer } from '../models/models';
 import { DEFAULT_BACKGROUND_MUSIC } from '../constants/constants';
 
@@ -9,36 +9,39 @@ import { DEFAULT_BACKGROUND_MUSIC } from '../constants/constants';
 export class PlayerService {
 
   public $video = new Subject<ISongForPlayer>();
+
   public $init = new BehaviorSubject<boolean>(false);
-  public $stop = new Subject();
+
+  public $initMain = new BehaviorSubject<boolean>(false);
+  public $initBackGround = new BehaviorSubject<boolean>(false);
+
+  public $stop = new Subject<boolean>();
   public $playBackGround = new Subject<IBackgroundMusic>();
   public $stopBackGround = new Subject<void>();
   public backgroundMusic:IBackgroundMusic = DEFAULT_BACKGROUND_MUSIC;
   public gameMode = false;
+  public initPlayers$ = new Subject<void>();
 
-  constructor() { }
+  constructor() {
+    combineLatest([this.$initMain, this.$initBackGround]).subscribe(
+      ([main, background]) => {
+        this.$init.next(main && background);
+      }
+    );
+  }
 
   play(song: ISong){
     this.$video.next(song);
-    return new Promise<void>((resolve) => {
-      const sub = this.$stop.subscribe(() => {
+    return new Promise<boolean>((resolve) => {
+      const sub = this.$stop.subscribe((fomPlayer) => {
         sub.unsubscribe();
-        resolve();
+        resolve(fomPlayer);
       })
     })
   }
 
-  simulatePlay(){
-    return new Promise<void>((resolve) => {
-      const sub = this.$stop.subscribe(() => {
-        sub.unsubscribe();
-        resolve();
-      })
-    })
-  }
-
-  stop(){
-    this.$stop.next(undefined)
+  stop(fomPlayer: boolean){
+    this.$stop.next(fomPlayer)
   }
 
   playBackGround(backgroundMusic?: IBackgroundMusic){
@@ -48,5 +51,18 @@ export class PlayerService {
     this.$stopBackGround.next();
   }
 
-
+  initPlayers(){
+    if(this.$init.getValue()){
+      return;
+    }
+    this.initPlayers$.next();
+    return new Promise<void>(resolve => {
+      const sub = this.$init.subscribe(val => {
+        if(val){
+          setTimeout(() => sub.unsubscribe());
+          resolve()
+        }
+      })
+    })
+  }
 }

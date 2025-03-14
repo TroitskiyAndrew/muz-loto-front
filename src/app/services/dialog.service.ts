@@ -9,23 +9,26 @@ import { Subject } from 'rxjs';
 })
 export class DialogService {
 
-  private dialogResult$ = new Subject<{dialogId: number, result: any}>();
+  private dialogResult$ = new Subject<{dialogId: number, result: any, close?: boolean}>();
 
   constructor(private dialog: MatDialog) { }
 
-  private open(data: DialogData): void {
-    this.dialog.open(DialogComponent, { data });
+  private open(data: DialogData, dialogId: number): void {
+    this.dialog.open(DialogComponent, { data : {...data, dialogId}, disableClose: Boolean(data.disableClose) });
   }
 
   init(data: DialogData): Promise<any> {
     const currentDialogId = Math.floor(Math.random() * 10001);
     data.buttons = data.buttons.map(button => this.createButton(button, currentDialogId));
-    this.open(data);
+    this.open(data, currentDialogId);
     return new Promise((resolve) => {
       const subs$ = this.dialogResult$.subscribe((res) => {
-        const {dialogId, result} = res;
+        const {dialogId, result, close} = res;
         if(dialogId === currentDialogId){
           subs$.unsubscribe();
+          if(close){
+            this.dialog.closeAll()
+          }
           resolve(result);
         }
       })
@@ -55,6 +58,10 @@ export class DialogService {
       }
     }
 
+  }
+
+  acceptResult(result: {dialogId: number, result: any}){
+    this.dialogResult$.next({...result, close: true});
   }
 
 }

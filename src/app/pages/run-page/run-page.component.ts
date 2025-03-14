@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IGame } from '../../models/models';
 import { Subject } from 'rxjs';
@@ -8,23 +8,20 @@ import { StateService } from '../../services/state.service';
 import { SocketService } from '../../services/socket.service';
 import { DialogService } from '../../services/dialog.service';
 import { FormControl, Validators } from '@angular/forms';
+import { GameService } from '../../services/game.service';
 
 @Component({
   selector: 'app-run-page',
   templateUrl: './run-page.component.html',
   styleUrl: './run-page.component.scss',
 })
-export class RunPageComponent {
-  game!: IGame;
-  $init = new Subject<boolean>();
-
+export class RunPageComponent implements OnDestroy {
   constructor(
     private route: ActivatedRoute,
-    private apiService: ApiService,
     private loadingService: LoadingService,
     private stateService: StateService,
-    private socketService: SocketService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    public gameService: GameService
   ) {
     this.init();
   }
@@ -35,71 +32,132 @@ export class RunPageComponent {
       throw new Error('нет кода');
     }
     this.loadingService.show();
-    const game = await this.apiService.getGame(code);
+    const game = await this.gameService.init({code, isFront: false});
     this.loadingService.hide();
     if (!game) {
       throw new Error('нет игры');
     }
-    this.game = game;
     this.stateService.gameCode = game.code;
   }
 
-  nextSong() {
-    this.socketService.nextSong();
+  startStep() {
+    this.gameService.makeStep();
   }
-  stopSong() {
-    this.socketService.stopSong();
+  finishStep() {
+    this.gameService.sendFinishStepMessage(false);
   }
-  startGame() {
-    this.socketService.startGame()
+  startRound() {
+    const roundField = {
+      id: 'roundIndex',
+      type: 'number',
+      label: '',
+      control: new FormControl(this.gameService.results.currentRoundIndex + 1, [
+        Validators.required,
+        Validators.min(1),
+        Validators.max(this.gameService.game.rounds.length),
+      ]),
+    };
+    this.dialogService.init({
+      message: 'Какой раунд начинаем?',
+      fields: [roundField],
+      buttons: [
+        {
+          label: 'Ок',
+          disabled: () => roundField.control.invalid,
+          action: () =>
+            this.gameService.sendStartRoundMessage(
+              Number(roundField.control.value) - 1
+            ),
+        },
+        {
+          label: 'Выход',
+          disabled: () => false,
+          action: () => null,
+          class: 'cancel',
+        },
+      ],
+    });
   }
-  sendAnswer(answer: boolean) {
-    this.socketService.modalAnswer(answer);
+
+  stopRound() {
+    this.gameService.sendStopRoundMessage(false);
   }
   async addTickets() {
     const tickets = await this.getTicketNumbers();
-
-    this.socketService.addTickets(tickets)
+    this.gameService.changePlayingTickets(tickets, true);
   }
   async excludeTickets() {
     const tickets = await this.getTicketNumbers();
-    this.socketService.excludeTickets(tickets)
+    this.gameService.changePlayingTickets(tickets, false);
   }
 
-  async getTicketNumbers(){
-    const fromField = { id: 'from', type: 'number', label: 'Начиная с', control: new FormControl<number | null>(null, [Validators.min(1)]) };
-    const toField = { id: 'to', type: 'number', label: 'Заканчивыая', control: new FormControl<number | null>(null, [Validators.min(1)]) };
-    const exactField = { id: 'exact', type: 'number', label: 'Конкретные номера', control: new FormControl<number | null>(null, [Validators.min(1)]) };
+  async getTicketNumbers() {
+    const fromField = {
+      id: 'from',
+      type: 'number',
+      label: 'Начиная с',
+      control: new FormControl<number | null>(null, [Validators.min(1)]),
+    };
+    const toField = {
+      id: 'to',
+      type: 'number',
+      label: 'Заканчивыая',
+      control: new FormControl<number | null>(null, [Validators.min(1)]),
+    };
+    const exactField = {
+      id: 'exact',
+      type: 'number',
+      label: 'Конкретные номера',
+      control: new FormControl<number | null>(null, [Validators.min(1)]),
+    };
 
-    return  this.dialogService.init({
+    return this.dialogService.init({
       message: 'Какие билеты',
       fields: [exactField, fromField, toField],
-      buttons: [{
-        label: 'Эти',
-        disabled: () => exactField.control.invalid || fromField.control.invalid || toField.control.invalid,
-        action: async () => {
-          const exact = exactField.control.value ? Number(exactField.control.value) : null;
-          const from = fromField.control.value ? Number(fromField.control.value) : null;
-          const to = toField.control.value ? Number(toField.control.value) : null;
-          if(exact) {
-            return [exact];
-          }
-          else if(!from && !to){
-            return [];
-          } else {
-            const first = from || 1;
-            const last = to || 100;
-            return Array.from({ length: last - first + 1 }, (_, i) => first + i);
-          }
-        }
-      },
-      {
-        label: 'Отмена',
-        disabled: () => false,
-        action: () => [],
-        class: 'cancel'
-      }
-      ]
-    })
+      buttons: [
+        {
+          label: 'Эти',
+          disabled: () =>
+            exactField.control.invalid ||
+            fromField.control.invalid ||
+            toField.control.invalid ||
+            (Boolean(fromField.control.value) &&
+              Boolean(toField.control.value) && Number(toField.control.value) < Number(fromField.control.value)),
+          action: async () => {
+            const exact = exactField.control.value
+              ? Number(exactField.control.value)
+              : null;
+            const from = fromField.control.value
+              ? Number(fromField.control.value)
+              : null;
+            const to = toField.control.value
+              ? Number(toField.control.value)
+              : null;
+            if (exact) {
+              return [exact];
+            } else if (!from && !to) {
+              return [];
+            } else {
+              const first = from || 1;
+              const last = to || this.gameService.game.ticketsCount;
+              return Array.from(
+                { length: last - first + 1 },
+                (_, i) => first + i
+              );
+            }
+          },
+        },
+        {
+          label: 'Отмена',
+          disabled: () => false,
+          action: () => [],
+          class: 'cancel',
+        },
+      ],
+    }) as Promise<number[]>;
+  }
+
+  ngOnDestroy(): void {
+    this.stateService.gameCode = '';
   }
 }

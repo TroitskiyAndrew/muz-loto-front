@@ -70,6 +70,7 @@ export class CreatorService {
     const game: INewGame = {
       owner: this.stateService.user?.id || '',
       logo: this.stateService.user?.logo || '',
+      comment: settings.comment,
       rounds: settings.rounds.map((round, index) => {
         const mandatorySongsForRound = randomizedMandatorySongs.filter(
           (song) => song.round === index + 1

@@ -4,7 +4,6 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PlayerComponent } from './components/player/player.component';
 import { FieldComponent } from './components/field/field.component';
-import { GameComponent } from './components/game/game.component';
 import { ModalComponent } from './components/modal/modal.component';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -25,13 +24,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { GamesPageComponent } from './pages/games-page/games-page.component';
 import { RunPageComponent } from './pages/run-page/run-page.component';
+import { GamePageComponent } from './pages/game-page/game-page.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     PlayerComponent,
     FieldComponent,
-    GameComponent,
+    GamePageComponent,
     ModalComponent,
     DialogComponent,
     HomePageComponent,

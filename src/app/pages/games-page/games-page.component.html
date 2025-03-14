@@ -1,35 +1,50 @@
 <div class="games">
   <div *ngFor="let game of games" class="game" [ngClass]="{ 'test-game': game.testGame }">
-    <div class="game__info">
-      <div *ngIf="game.testGame" class="game__info__item game__info__test">
-        <div class="game__info__label">Тестовая игра</div>
-        <div class="game__info__value"></div>
+    <div class="game__main">
+      <div class="game__info">
+        <div *ngIf="game.testGame" class="game__info__item game__info__test">
+          <div class="game__info__label">Тестовая игра</div>
+          <div class="game__info__value"></div>
+        </div>
+        <div class="game__info__item">
+          <div class="game__info__label">Код</div>
+          <div class="game__info__value">{{ game.code }}</div>
+        </div>
+        <div class="game__info__item">
+          <div class="game__info__label">Билеты</div>
+          <div class="game__info__value">{{ game.ticketsCount }}</div>
+        </div>
       </div>
-      <div class="game__info__item">
-        <div class="game__info__label">Код</div>
-        <div class="game__info__value">{{ game.code }}</div>
-      </div>
-      <div class="game__info__item game__info__last">
-        <div class="game__info__label">Последний запуск</div>
-        <div class="game__info__value">{{ game.results.lastStart || '--------------------' }}</div>
-      </div>
-      <div class="game__info__item">
-        <div class="game__info__label">Билеты</div>
-        <div class="game__info__value">{{ game.ticketsCount }}</div>
+      <div class="game__actions">
+        <div class="game__actions__group">
+          <button color="warn" mat-raised-button (click)="resetResults(game)"
+            [disabled]="isResetDisabled(game)">Сбросить результаты</button>
+          <button color="warn" mat-raised-button (click)="deleteGame(game.id)"
+            [disabled]="!stateService.user?.isAdmin && !game.testGame">Удалить игру</button>
+        </div>
+        <div class="game__actions__group">
+          <button color="primary" mat-raised-button (click)="printTickets(game)"
+            [disabled]="gameService.isGameFinished(game)">Печать билетов</button>
+          <button color="accent" mat-raised-button (click)="addTickets(game)"
+            [disabled]="gameService.isGameFinished(game)">Добавить билеты</button>
+        </div>
+        <div class="game__actions__group">
+          <button color="primary" mat-raised-button (click)="runGame(game)"
+            [disabled]="gameService.isGameFinished(game)">Управлять игрой</button>
+          <button color="accent" mat-raised-button (click)="startGame(game)"
+            [disabled]="gameService.isGameFinished(game)">Запустить игру</button>
+        </div>
       </div>
     </div>
-    <div class="game__actions">
-      <div class="game__actions__group">
-        <button color="warn" mat-raised-button (click)="resetResults(game)" [disabled]="isResetDisabled(game)">Сбросить результаты</button>
-        <button color="warn" mat-raised-button (click)="deleteGame(game.id)" [disabled]="!stateService.user?.isAdmin && !game.testGame">Удалить игру</button>
-      </div>
-      <div class="game__actions__group">
-        <button color="primary" mat-raised-button (click)="printTickets(game.id, game.logo)">Печать билетов</button>
-        <button color="accent" mat-raised-button  (click)="addTickets(game)">Добавить билеты</button>
-      </div>
-      <div class="game__actions__group">
-        <button color="primary" mat-raised-button  (click)="runGame(game.code)">Управлять игрой</button>
-        <button color="accent" mat-raised-button  (click)="startGame(game.code)">Запустить игру</button>
+    <div class="game__additionals">
+      <div class="game__info__item game__info__results">
+        <div class="game__info__label">Последний запуск</div>
+        <div class="game__info__value">{{ game.results.lastStart || '--------------------' }}</div>
+        <ng-container *ngFor="let round of game.rounds; let i = index">
+          <div class="game__info__label">{{round.name}}</div>
+          <div class="game__info__value">{{ getRoundResults(game, i) }}
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>
@@ -88,3 +103,4 @@
     </div>
   </div>
 </ng-container>
+<ng-container></ng-container>
