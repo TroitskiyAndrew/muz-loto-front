@@ -25,12 +25,20 @@ input.ng-invalid {
 
 .settings {
   display: flex;
-  column-gap: 5px;
+  column-gap: 10px;
   align-items: center;
   padding: 10px;
   &__rounds {
     display: flex;
     column-gap: 10px;
+  }
+  &__main {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+  }
+  &__comment {
+    width: 100%;
   }
   fieldset {
     display: flex;

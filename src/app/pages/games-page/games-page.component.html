@@ -46,6 +46,10 @@
           </div>
         </ng-container>
       </div>
+      <div *ngIf="game.comment" class="game__info__item">
+        <div class="game__info__label">Комментарий</div>
+        <div class="game__info__value">{{ game.comment }}</div>
+      </div>
     </div>
   </div>
 
