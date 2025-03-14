@@ -22,8 +22,10 @@ export class StateService {
   user: IUser | null = null;
   $init = new BehaviorSubject<boolean>(false);
   showHome = true;
+  showContacts = true;
 
-  constructor() {}
+  constructor() {
+  }
 
   setUser(user: IUser){
     this.user = user;

@@ -46,6 +46,7 @@ export class GamePageComponent implements OnDestroy {
     private playerService: PlayerService,
     private stateService: StateService
   ) {
+    this.stateService.showContacts = false;
     this.init();
   }
 
@@ -58,29 +59,7 @@ export class GamePageComponent implements OnDestroy {
     let game: IGame | null;
     let code = this.route.snapshot.params['code'];
     if (code) {
-      if (history.state.navigationId === 1) {
-        const answer = await this.dialogService.init({
-          disableClose: true,
-          message: `Продолжаем игру ${code}?`,
-          buttons: [
-            {
-              label: 'Ок',
-              disabled: () => false,
-              action: () => true,
-            },
-            {
-              label: 'Выход',
-              disabled: () => false,
-              action: () => null,
-              class: 'cancel',
-            },
-          ],
-        });
-        if (answer === null) {
-          this.router.navigate(['']);
-          return;
-        }
-      }
+
       game = history.state.game;
       const initParams = game
         ? { game, isFront: true }
@@ -92,7 +71,7 @@ export class GamePageComponent implements OnDestroy {
         this.router.navigate(['']);
         return;
       }
-      await this.playerService.initPlayers();
+
       this.playerService.playBackGround(game.backgroundMusic);
       this.loadingService.hide();
     } else {
@@ -122,7 +101,12 @@ export class GamePageComponent implements OnDestroy {
       this.router.navigate(code != null ? ['game/', code] : ['']);
       return;
     }
-
+    const cub = this.playerService.$initBackGround.subscribe((val) => {
+      if(val) {
+        this.playerService.playBackGround(game.backgroundMusic);
+        setTimeout(() => cub.unsubscribe())
+      }
+    })
     this.stateService.gameCode = game.code;
     this.playerService.gameMode = true;
     if (game.testGame) {
@@ -195,5 +179,6 @@ export class GamePageComponent implements OnDestroy {
     this.playerService.stopBackGround();
     this.socketService.unsubscribe(SocketMessageType.Player);
     this.stateService.gameCode = '';
+    this.stateService.showContacts = true;
   }
 }

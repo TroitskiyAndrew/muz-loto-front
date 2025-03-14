@@ -13,11 +13,33 @@
   justify-content: center;
 }
 
-// .first-click {
-//   position: absolute;
-//   top: 0;
-//   left: 0;
-//   z-index: 9999;
-//   height: 100%;
-//   width: 100%;
-// }
+.contacts {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+  &__item{
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+
+
+  }
+
+  &__img{
+    width: 50px;
+  }
+  &__tg{
+    height: 50px;
+  }
+  &__mail{
+    height: 45px;
+  }
+
+  &__link{
+    cursor: pointer;
+  }
+}
+

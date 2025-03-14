@@ -4,3 +4,18 @@
 
 <button *ngIf="stateService.showHome" color="accent" mat-fab class="home" (click)="goHome()"><mat-icon>home</mat-icon></button>
 
+<div *ngIf="stateService.showContacts" class="contacts">
+  <div class="contacts__item">
+    <div class="contacts__img">
+      <img class="contacts__tg" src="assets/telegram.png" alt="">
+    </div>
+    <a class="contacts__link" href="https://t.me/Troitskiy_Andrey">&#64;Troitskiy_Andrey</a>
+  </div>
+  <div class="contacts__item">
+    <div class="contacts__img">
+      <img class="contacts__mail" src="assets/mail.png" alt="">
+    </div>
+    <a class="contacts__link" href="mailto:troitskiya@yandex.ru"> TroitskiyA&#64;yandex.ru </a>
+  </div>
+</div>
+<app-player></app-player>

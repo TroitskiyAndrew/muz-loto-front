@@ -23,7 +23,7 @@ import { GameService } from '../../services/game.service';
   templateUrl: './player.component.html',
   styleUrl: './player.component.scss',
 })
-export class PlayerComponent implements  OnDestroy {
+export class PlayerComponent implements OnDestroy {
   @ViewChild('playerContainer', { static: true }) playerContainer!: ElementRef;
   @ViewChild('backgroundMusic', { static: true }) backgroundMusic!: ElementRef;
   private player: any;
@@ -39,8 +39,10 @@ export class PlayerComponent implements  OnDestroy {
     private playerService: PlayerService,
     private gameService: GameService
   ) {
-    this.sub = this.playerService.initPlayers$.subscribe(() => {
-      this.init();
+    this.sub = this.playerService.$startInit.subscribe((init) => {
+      if (init) {
+        this.init();
+      }
     })
   }
 
@@ -74,6 +76,9 @@ export class PlayerComponent implements  OnDestroy {
     if (this.player) {
       this.player.destroy();
     }
+    if (this.backgroundPlayer) {
+      this.backgroundPlayer.destroy();
+    }
     this.sub.unsubscribe();
     this.playerService.$initMain.next(false);
     this.playerService.$initBackGround.next(false);
@@ -97,6 +102,7 @@ export class PlayerComponent implements  OnDestroy {
         events: {
           onReady: () => {
             this.player.setVolume(0);
+            console.log('initMain')
             this.playerService.$initMain.next(true);
             const iframe = document.querySelector(
               'app-player > .player-wrapper > iframe'
@@ -129,8 +135,12 @@ export class PlayerComponent implements  OnDestroy {
         events: {
           onReady: () => {
             this.playerService.$initBackGround.next(true);
+            console.log('initBackGround')
             this.sub = this.playerService.$playBackGround.subscribe(
               (backgroundMusic) => {
+                if(!backgroundMusic){
+                  return;
+                }
                 this.playerService.backgroundMusic = backgroundMusic;
                 this.backgroundPlayer.loadVideoById(backgroundMusic.youtubeId);
                 this.backgroundPlayer.setVolume(0);

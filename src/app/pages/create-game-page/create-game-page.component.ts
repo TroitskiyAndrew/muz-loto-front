@@ -46,7 +46,6 @@ export class CreateGamePageComponent implements OnDestroy {
   usageFilter = '';
   form: FormGroup;
   songForm: FormGroup;
-  sub: Subscription;
   isBackGroundPlaying = false;
 
   constructor(
@@ -61,11 +60,13 @@ export class CreateGamePageComponent implements OnDestroy {
     private dialogService: DialogService
   ) {
     this.loadingService.show();
-    this.sub = this.stateService.$init.subscribe((init: boolean) => {
+    this.stateService.showContacts = false;
+    const sub$ =  this.stateService.$init.subscribe((init: boolean) => {
       if (!init) {
         this.loadingService.hide();
         return;
       }
+      setTimeout(() => sub$.unsubscribe())
       this.init().finally(() => this.loadingService.hide());
     });
     this.form = this.fb.group({
@@ -147,7 +148,6 @@ export class CreateGamePageComponent implements OnDestroy {
   }
 
   async init() {
-    await this.playerService.initPlayers();
     this.songs = ((await this.songsService.getSongs()) || []).map(this.mapSong);
     this.dataSource = new MatTableDataSource<IDisplaySong>(this.songs);
     this.dataSource.sort = this.sort;
@@ -288,6 +288,6 @@ export class CreateGamePageComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.sub.unsubscribe();
+    this.stateService.showContacts = true;
   }
 }

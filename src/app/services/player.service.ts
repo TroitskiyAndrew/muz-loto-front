@@ -16,19 +16,13 @@ export class PlayerService {
   public $initBackGround = new BehaviorSubject<boolean>(false);
 
   public $stop = new Subject<boolean>();
-  public $playBackGround = new Subject<IBackgroundMusic>();
+  public $playBackGround = new BehaviorSubject<IBackgroundMusic | null>(null);
   public $stopBackGround = new Subject<void>();
   public backgroundMusic:IBackgroundMusic = DEFAULT_BACKGROUND_MUSIC;
   public gameMode = false;
-  public initPlayers$ = new Subject<void>();
+  public $startInit = new Subject<boolean>();
 
-  constructor() {
-    combineLatest([this.$initMain, this.$initBackGround]).subscribe(
-      ([main, background]) => {
-        this.$init.next(main && background);
-      }
-    );
-  }
+  constructor() {}
 
   play(song: ISong){
     this.$video.next(song);
@@ -51,18 +45,4 @@ export class PlayerService {
     this.$stopBackGround.next();
   }
 
-  initPlayers(){
-    if(this.$init.getValue()){
-      return;
-    }
-    this.initPlayers$.next();
-    return new Promise<void>(resolve => {
-      const sub = this.$init.subscribe(val => {
-        if(val){
-          setTimeout(() => sub.unsubscribe());
-          resolve()
-        }
-      })
-    })
-  }
 }

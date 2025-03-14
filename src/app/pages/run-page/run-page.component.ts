@@ -23,10 +23,12 @@ export class RunPageComponent implements OnDestroy {
     private dialogService: DialogService,
     public gameService: GameService
   ) {
+    this.stateService.showContacts = false;
     this.init();
   }
 
   async init() {
+
     const code = this.route.snapshot.params['code'];
     if (!code) {
       throw new Error('нет кода');
@@ -133,5 +135,6 @@ export class RunPageComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.stateService.gameCode = '';
+    this.stateService.showContacts = true;
   }
 }
