@@ -83,7 +83,7 @@ export class RunPageComponent implements OnDestroy {
     const exactField = {
       id: 'exact',
       type: 'number',
-      label: 'Конкретные номера',
+      label: 'Конкретный номер',
       control: new FormControl<number | null>(null, [Validators.min(1)]),
     };
 
