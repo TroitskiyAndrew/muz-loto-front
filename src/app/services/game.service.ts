@@ -87,7 +87,7 @@ export class GameService implements OnDestroy {
     this.game = game;
     this.tickets = await this.apiService.getTickets(this.game.id);
     this.stateService.gameCode = this.game.code;
-    if (!game.results.playingTicketsAsked && !this.isFront) {
+    if (!game.results.playingTicketsNumbers.length && !this.isFront) {
       this.sendAskPlayingTicketsCountMessage();
     }
     if (this.game.results.stepWinners.length) {
@@ -213,7 +213,6 @@ export class GameService implements OnDestroy {
     this.playingTicketsNumbers = this.tickets
       .map((ticket) => ticket.number)
       .filter((number) => number <= result);
-    this.results.playingTicketsAsked = true;
   }
 
   answerPlayingTickets(result: number) {
@@ -309,7 +308,7 @@ export class GameService implements OnDestroy {
       `Билеты № ${results.newWinners} выиграли ${
       // @ts-ignore
       WIN_NAMING[logWinner]
-      } в ${this.playingRound.name} на ${this.results.currentStep} ходу`
+      } в ${this.playingRound.name} на ${this.currentStep} ходу`
     );
     this.playingTicketsNumbers = this.playingTicketsNumbers.filter(number => !results.wastedTickets.includes(number))
     this.results.gameWinners.push(...results.newWinners);
@@ -337,7 +336,7 @@ export class GameService implements OnDestroy {
     if (!preparation) {
       return;
     }
-    if (!this.results.playingTicketsAsked && this.isFront) {
+    if (!this.results.playingTicketsNumbers.length && this.isFront) {
       if (!this.simulation) {
         this.sendAskPlayingTicketsCountMessage();
       } else {
@@ -353,7 +352,6 @@ export class GameService implements OnDestroy {
     }
     this.blockStartStep = false;
     this.results.currentRoundIndex = roundIndex;
-    this.results.currentStep = this.playedSongs.length + 1;
     this.playedSongs.forEach(
       (playedSongId) => (this.roundSongsMap.get(playedSongId)!.played = true)
     );
@@ -370,7 +368,6 @@ export class GameService implements OnDestroy {
     this.selectedSong = null;
     if (next) {
       this.results.currentRoundIndex++;
-      this.results.currentStep = 1;
     }
   }
 
@@ -382,7 +379,7 @@ export class GameService implements OnDestroy {
   }
 
   sendStartStepMessage(results: IStepResults) {
-    if (this.game.testGame && this.results.currentStep === TEST_PERIOD) {
+    if (this.game.testGame && this.currentStep === TEST_PERIOD) {
       this.dialogService
         .popUp({ message: 'Это была тестовая игра', disableClose: true })
         .then(() => this.router.navigate(['']));
@@ -401,7 +398,6 @@ export class GameService implements OnDestroy {
     }
     this.selectedSong = null;
     this.selectedSongId = results.selectedSongId;
-    this.results.currentStep++;
     this.playedSongs.push(results.selectedSongId);
     this.stepWinners = results.stepWinners;
     if (results.newLastStart) {
@@ -418,7 +414,7 @@ export class GameService implements OnDestroy {
     if (this.blockStartStep) {
       return;
     }
-    if (this.results.currentStep === this.roundSongs.length) {
+    if (this.results.rounds[this.results.currentRoundIndex].playedSongs.length === this.roundSongs.length) {
       this.sendStopRoundMessage(true);
       if (this.simulation && this.playingRound) {
         this.sendStartRoundMessage();
@@ -432,7 +428,6 @@ export class GameService implements OnDestroy {
       newLastStart = this.getLastStart();
     }
     const selectedSongId = this.gameEngineService.selectSong(this.playingTickets, this.results.gameWinners, this.wantedWinner !== null ? this.playingRound[this.wantedWinner] : null, this.availableSongsIds, this.playedSongs, this.wantedWinner);
-
     const stepWinners = this.gameEngineService.getWinners(this.playingTickets, selectedSongId, this.playedSongs, this.wantedWinner);
 
     this.sendStartStepMessage({ stepWinners, selectedSongId, newLastStart });
@@ -494,7 +489,7 @@ export class GameService implements OnDestroy {
         this.sendWinnerAnswerMessage([]);
       }
     }
-    if (this.results.currentStep === this.roundSongs.length) {
+    if (this.results.rounds[this.results.currentRoundIndex].playedSongs.length === this.roundSongs.length) {
       this.sendStopRoundMessage(true);
       if (this.simulation) {
         if (this.playingRound) {
@@ -591,11 +586,11 @@ export class GameService implements OnDestroy {
   }
 
   get wantedWinner() {
-    return this.results.wantedWinner;
+    return this.results.rounds[this.results.currentRoundIndex].wantedWinner;
   }
 
   set wantedWinner(wantedWinner: Winner | null) {
-    this.results.wantedWinner = wantedWinner;
+    this.results.rounds[this.results.currentRoundIndex].wantedWinner = wantedWinner;
   }
 
   get stepWinners() {
@@ -605,6 +600,10 @@ export class GameService implements OnDestroy {
   set stepWinners(winners) {
     this.results.stepWinners.length = 0;
     this.results.stepWinners.push(...winners);
+  }
+
+  get currentStep(){
+    return this.results.rounds[this.results.currentRoundIndex].playedSongs.length + 1;
   }
 
   getLastStart() {

@@ -9,13 +9,10 @@ export const DEFAULT_BACKGROUND_MUSIC: IBackgroundMusic = {
 export function getDefaultResults(roundsCount: number): IGameResults {
   return {
     lastStart: null,
-    wantedWinner: Winner.Line,
     gameWinners: [],
     playingTicketsNumbers: [],
-    playingTicketsAsked: false,
-    rounds: Array.from({ length: roundsCount }, () => ({ playedSongs: [] })),
+    rounds: Array.from({ length: roundsCount }, () => ({ playedSongs: [], wantedWinner: Winner.Line })),
     currentRoundIndex: 0,
-    currentStep: 1,
     stepWinners:[],
   }
 }

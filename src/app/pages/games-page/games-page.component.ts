@@ -95,8 +95,7 @@ export class GamesPageComponent implements OnDestroy {
     if(this.stateService.user?.isAdmin){
       return false;
     }
-    return game.results.currentRoundIndex > 0 ||
-    game.results.currentStep > 5;
+    return game.results.rounds.some(roundResult => roundResult.playedSongs.length > 5);
   }
 
   async resetResults(game: IGame) {

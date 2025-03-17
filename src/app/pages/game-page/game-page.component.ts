@@ -59,13 +59,8 @@ export class GamePageComponent implements OnDestroy {
     let game: IGame | null;
     let code = this.route.snapshot.params['code'];
     if (code) {
-
-      game = history.state.game;
-      const initParams = game
-        ? { game, isFront: true }
-        : { code, isFront: true };
       this.loadingService.show();
-      game = await this.gameService.init(initParams);
+      game = await this.gameService.init({ code, isFront: true });
       if (!game) {
         this.loadingService.hide();
         this.router.navigate(['']);

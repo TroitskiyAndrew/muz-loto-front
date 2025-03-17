@@ -106,18 +106,16 @@ export interface IUsedSongs {
 
 export interface IGameResults {
   lastStart: string | null;
-  wantedWinner: Winner | null;
   gameWinners: number[];
   playingTicketsNumbers: number[];
-  playingTicketsAsked: boolean;
   rounds: IRoundResults[];
   currentRoundIndex: number;
-  currentStep: number;
   stepWinners: number[];
 }
 
 export interface IRoundResults {
   playedSongs: string[];
+  wantedWinner: Winner | null;
 }
 
 export interface IRound {
