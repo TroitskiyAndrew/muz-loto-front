@@ -114,8 +114,8 @@ export class SocketService {
   }
 
   submitWin( results: ISubmitWinnersResults){
-    const {newWinners, wantedWinner} = results;
-    this.sendMessage<GameMessagePayload>({ type: SocketMessageType.Game,  data: { type: GameMessageType.SubmitWinners, newWinners, wantedWinner } });
+    const {newWinners, wantedWinner, wastedTickets} = results;
+    this.sendMessage<GameMessagePayload>({ type: SocketMessageType.Game,  data: { type: GameMessageType.SubmitWinners, newWinners, wantedWinner, wastedTickets } });
   }
 
   finishStep() {

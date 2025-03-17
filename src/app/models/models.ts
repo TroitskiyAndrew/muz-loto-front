@@ -215,7 +215,7 @@ export interface IStepResults {
 }
 
 export interface ISubmitWinnersResults {
-  newWinners: number[]; wantedWinner: Winner | null
+  newWinners: number[]; wantedWinner: Winner | null, wastedTickets: number[]
 }
 export interface IChangeTicketsResults {
   tickets: number[], add: boolean

@@ -4,9 +4,15 @@
   <div *ngIf="!gameService.playingMode" class="rounds">
     <button *ngFor="let round of gameService.game.rounds; let i = index" class="round" color="primary" mat-raised-button (click)="startRound(i)" [disabled]="gameService.isRoundFinished(gameService.game, i)"> {{round.name}}</button>
   </div>
-  <div class="controls__group">
-    <button class="green" mat-raised-button  (click)="addTickets()">Вернуть билеты в игру</button>
-    <button class="red" mat-raised-button  (click)="excludeTickets()"> Билеты не играют</button>
+  <div class="tickets">
+    <div>
+      <span>Билеты в игре: </span>
+      <span class="tickets__numbers">{{this.getPlayingTicketsNumber()}}</span>
+    </div>
+    <div class="controls__group">
+      <button class="green" mat-raised-button  (click)="addTickets()">Вернуть билеты в игру</button>
+      <button class="red" mat-raised-button  (click)="excludeTickets()">Убрать билеты из игры</button>
+    </div>
   </div>
   <button *ngIf="gameService.playingMode" color="warn" mat-raised-button   (click)="stopRound()" [disabled]="gameService.isSongPlaying">Закончить раунд</button>
 </div>

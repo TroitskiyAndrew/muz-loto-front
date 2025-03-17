@@ -133,6 +133,25 @@ export class RunPageComponent implements OnDestroy {
     }) as Promise<number[]>;
   }
 
+  getPlayingTicketsNumber() {
+    const arr = this.gameService.playingTicketsNumbers;
+    if (!arr.length) return "";
+
+    let result = [];
+    let start = arr[0];
+    let prev = arr[0];
+
+    for (let i = 1; i <= arr.length; i++) {
+        if (arr[i] !== prev + 1) {
+            result.push(start === prev ? `${start}` : `${start}-${prev}`);
+            start = arr[i];
+        }
+        prev = arr[i];
+    }
+
+    return result.join(", ");
+}
+
   ngOnDestroy(): void {
     this.stateService.gameCode = '';
     this.stateService.showContacts = true;

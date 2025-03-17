@@ -15,7 +15,7 @@ export function getDefaultResults(roundsCount: number): IGameResults {
     playingTicketsAsked: false,
     rounds: Array.from({ length: roundsCount }, () => ({ playedSongs: [] })),
     currentRoundIndex: 0,
-    currentStep: 0,
+    currentStep: 1,
     stepWinners:[],
   }
 }
