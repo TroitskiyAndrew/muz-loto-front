@@ -268,6 +268,7 @@ export class CreateGamePageComponent implements OnDestroy {
       return;
     }
     const settings = { ...this.form.getRawValue(), testGame };
+    this.scratchGame!.testGame = testGame;
     this.loadingService.show();
     await this.creatorService
       .createGame({game: this.scratchGame!, usedSongsArr: this.usedSongsArr, songsPreferences: this.songs})
@@ -281,6 +282,7 @@ export class CreateGamePageComponent implements OnDestroy {
       .finally(() => this.loadingService.hide());
     this.router.navigate(['/']);
   }
+
   async generateGame(testGame = false) {
     const settings = { ...this.form.getRawValue(), testGame };
     const {game, usedSongsArr} = this.creatorService
