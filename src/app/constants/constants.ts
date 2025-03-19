@@ -1,17 +1,17 @@
 import { environment } from "../../environments/environment";
-import { IBackgroundMusic, IGameResults, Winner } from "../models/models";
+import { IBackgroundMusic, IGameResults, IRound, Winner } from "../models/models";
 
 export const DEFAULT_BACKGROUND_MUSIC: IBackgroundMusic = {
   youtubeId: 'PJxxfilLnGI',
   start: 930,
 };
 
-export function getDefaultResults(roundsCount: number): IGameResults {
+export function getDefaultResults(rounds: IRound[]): IGameResults {
   return {
     lastStart: null,
     gameWinners: [],
     playingTicketsNumbers: [],
-    rounds: Array.from({ length: roundsCount }, () => ({ playedSongs: [], wantedWinner: Winner.Line })),
+    rounds: rounds.map((round) => ({ playedSongs: [], wantedWinner: round[Winner.Line] ? Winner.Line : round[Winner.Cross] ? Winner.Cross : round[Winner.All] ? Winner.All : null})),
     currentRoundIndex: 0,
     stepWinners:[],
   }

@@ -175,6 +175,7 @@ export class GameEngineService {
     }
 
     if (
+      tickets &&
       tickets.length &&
       winnersArray.length === count &&
       winnersArray.every((winner) => tickets.includes(winner))

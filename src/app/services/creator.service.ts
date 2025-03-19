@@ -10,6 +10,7 @@ import {
   Winner,
   INewGame,
   IUsedSongs,
+  IRound,
 } from '../models/models';
 import { StateService } from './state.service';
 import {
@@ -67,7 +68,7 @@ export class CreatorService {
     const usedSongs = new Set<string>(
       randomizedMandatorySongs.map((song) => song.id)
     );
-    const game: INewGame = {
+    const newGame: Omit<INewGame, 'results'> = {
       owner: this.stateService.user?.id || '',
       logo: this.stateService.user?.logo || '',
       comment: settings.comment,
@@ -107,36 +108,37 @@ export class CreatorService {
         usedSongsArr.push(
           ...songs.map((song) => ({ id: song.id, round: index + 1 }))
         );
-        return {
+
+        const result: IRound = {
           name: `Раунд №${index + 1}`,
           field,
-          [Winner.Line]: {
-            count: round.lineWinners,
-            tickets: [],
-            from: 8,
-            to: 11,
-          },
-          [Winner.Cross]: {
-            count: round.crossWinners,
-            tickets: [],
-            from: 15,
-            to: 25,
-          },
-          [Winner.All]: {
-            count: round.allWinners,
-            tickets: [],
-            from: 35,
-            to: 38,
-          },
         };
+        if(round.lineWinners){
+          result[Winner.Line] = {
+            count: round.lineWinners,
+          }
+        }
+        if(round.crossWinners){
+          result[Winner.Cross] = {
+            count: round.crossWinners,
+          }
+        }
+        if(round.allWinners){
+          result[Winner.All] = {
+            count: round.allWinners,
+          }
+        }
+        return result;
       }),
       ticketsCount: 0,
       backgroundMusic: settings.backgroundMusic,
       code: this.generateCode(),
       testGame: settings.testGame,
-      results: getDefaultResults(settings.rounds.length),
     };
-
+    const game: INewGame = {
+      ...newGame,
+      results: getDefaultResults(newGame.rounds)
+    }
     const createdGame = await this.apiService.createGame({
       game,
       songsPreferences: songs.map(({ id, priority, disabled, round }) => ({

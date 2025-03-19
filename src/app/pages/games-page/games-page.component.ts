@@ -102,7 +102,7 @@ export class GamesPageComponent implements OnDestroy {
     if (this.isResetDisabled(game)) {
       return;
     }
-    const results = getDefaultResults(game.rounds.length);
+    const results = getDefaultResults(game.rounds);
     this.loadingService.show();
     await this.apiService.updateGame({ id: game.id, results });
     this.loadingService.hide();

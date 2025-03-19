@@ -291,15 +291,20 @@ export class GameService implements OnDestroy {
       return { wantedWinner: this.wantedWinner, newWinners: [], wastedTickets };
     }
     return {
-      wantedWinner:
-        this.wantedWinner === Winner.Line
-          ? Winner.Cross
-          : this.wantedWinner === Winner.Cross
-            ? Winner.All
-            : null,
+      wantedWinner: this.getNextWantedWinner(this.wantedWinner!),
       newWinners: this.stepWinners,
       wastedTickets: []
     };
+  }
+
+  getNextWantedWinner(wantedWinner: Winner): Winner | null{
+    if(wantedWinner === Winner.Line){
+      return this.playingRound[Winner.Cross] ? Winner.Cross : this.getNextWantedWinner(Winner.Cross);
+    }
+    if(wantedWinner === Winner.Cross){
+      return this.playingRound[Winner.All] ? Winner.All : null;
+    }
+    return null
   }
 
   submitWinnersChanges(results: ISubmitWinnersResults) {
@@ -427,7 +432,7 @@ export class GameService implements OnDestroy {
       this.isFirstStep = false;
       newLastStart = this.getLastStart();
     }
-    const selectedSongId = this.gameEngineService.selectSong(this.playingTickets, this.results.gameWinners, this.wantedWinner !== null ? this.playingRound[this.wantedWinner] : null, this.availableSongsIds, this.playedSongs, this.wantedWinner);
+    const selectedSongId = this.gameEngineService.selectSong(this.playingTickets, this.results.gameWinners, this.wantedWinner !== null ? this.playingRound[this.wantedWinner]! : null, this.availableSongsIds, this.playedSongs, this.wantedWinner);
     const stepWinners = this.gameEngineService.getWinners(this.playingTickets, selectedSongId, this.playedSongs, this.wantedWinner);
 
     this.sendStartStepMessage({ stepWinners, selectedSongId, newLastStart });
@@ -498,7 +503,7 @@ export class GameService implements OnDestroy {
         } else if (this.simulationAttempt <= this.simulationCount) {
           console.log(this.simulationAttempt)
           this.simulationAttempt++;
-          this.game.results = getDefaultResults(this.game.rounds.length);
+          this.game.results = getDefaultResults(this.game.rounds);
           this.sendStartRoundMessage();
           this.makeStep();
         }

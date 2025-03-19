@@ -121,16 +121,16 @@ export interface IRoundResults {
 export interface IRound {
   name: string;
   field: IRoundSong[][];
-  [Winner.Line]: IWinnersSettings;
-  [Winner.Cross]: IWinnersSettings;
-  [Winner.All]: IWinnersSettings;
+  [Winner.Line]?: IWinnersSettings;
+  [Winner.Cross]?: IWinnersSettings;
+  [Winner.All]?: IWinnersSettings;
 }
 
 export interface IWinnersSettings {
   count: number;
-  tickets: number[];
-  from: number;
-  to: number;
+  tickets?: number[];
+  from?: number;
+  to?: number;
 }
 
 export interface ITicket {

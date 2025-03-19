@@ -93,15 +93,15 @@ export class CreateGamePageComponent implements OnDestroy {
           ticketFieldRows: [{ value: 5, disabled: true }, Validators.required],
           lineWinners: [
             1,
-            [Validators.required, Validators.min(1), Validators.max(2)],
+            [Validators.required, Validators.min(0), Validators.max(2)],
           ],
           crossWinners: [
             1,
-            [Validators.required, Validators.min(1), Validators.max(2)],
+            [Validators.required, Validators.min(0), Validators.max(2)],
           ],
           allWinners: [
-            { value: 1, disabled: true },
-            [Validators.required, Validators.min(1), Validators.max(2)],
+            1,
+            [Validators.required, Validators.min(0), Validators.max(1)],
           ],
           notRusSongs: [
             5,
@@ -121,15 +121,15 @@ export class CreateGamePageComponent implements OnDestroy {
           ticketFieldRows: [{ value: 5, disabled: true }, Validators.required],
           lineWinners: [
             1,
-            [Validators.required, Validators.min(1), Validators.max(2)],
+            [Validators.required, Validators.min(0), Validators.max(2)],
           ],
           crossWinners: [
             1,
-            [Validators.required, Validators.min(1), Validators.max(2)],
+            [Validators.required, Validators.min(0), Validators.max(2)],
           ],
           allWinners: [
-            { value: 1, disabled: true },
-            [Validators.required, Validators.min(1), Validators.max(2)],
+            1,
+            [Validators.required, Validators.min(0), Validators.max(1)],
           ],
           notRusSongs: [
             5,
