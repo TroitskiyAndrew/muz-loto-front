@@ -20,24 +20,27 @@
     Создать тестовую игру
   </button>
   <div class="settings">
-    <div class="settings__main">
-      <label>
-        Количество билетов:
-        <input type="number" formControlName="ticketsCount" />
-      </label>
-      <label>
-        Комментарий:
-        <input class="settings__comment" formControlName="comment" />
-      </label>
-      <fieldset formGroupName="backgroundMusic">
-        <legend>Фоновая музыка</legend>
-        <label>
-          YouTube ID:
-          <input formControlName="youtubeId" />
+    <div class="settings__left">
+      <fieldset class="settings__main">
+        <legend>Основные</legend>
+        <label class="settings__item">
+          Количество билетов:
+          <input type="number" formControlName="ticketsCount" />
         </label>
-        <label>
+        <label class="settings__item settings__comment">
+          Комментарий:
+          <input formControlName="comment" />
+        </label>
+      </fieldset>
+      <fieldset formGroupName="backgroundMusic" class="settings__backgroundMusic">
+        <legend>Фоновая музыка</legend>
+        <label class="settings__item">
+          YouTube ID:
+          <input class="youtube-id" formControlName="youtubeId" />
+        </label>
+        <label class="settings__item">
           Старт (секунды):
-          <input type="number" formControlName="start" />
+          <input class="start-from" type="number" formControlName="start" />
         </label>
         <button
           *ngIf="!isBackGroundPlaying"
@@ -58,40 +61,40 @@
     </div>
     <div class="settings__rounds" formArrayName="rounds">
       <div
-        class="settings__rounds__item"
+
         *ngFor="let round of rounds.controls; let i = index"
         [formGroup]="round"
       >
-        <fieldset>
+        <fieldset class="settings__rounds__item">
           <legend>Раунд {{ i + 1 }}</legend>
-          <label
+          <!-- <label class="settings__item"
             >Колонки поля:
             <input type="number" formControlName="roundFieldColumns"
           /></label>
-          <label
+          <label class="settings__item"
             >Ряды поля: <input type="number" formControlName="roundFieldRows"
           /></label>
-          <label
+          <label class="settings__item"
             >Колонки билета:
             <input type="number" formControlName="ticketFieldColumns"
           /></label>
-          <label
+          <label class="settings__item"
             >Ряды билета:
             <input type="number" formControlName="ticketFieldRows"
-          /></label>
-          <label
+          /></label> -->
+          <label class="settings__item"
             >Иностранные песни:
             <input type="number" formControlName="notRusSongs"
           /></label>
-          <label
+          <label class="settings__item"
             >Победители Линия:
             <input type="number" formControlName="lineWinners"
           /></label>
-          <label
+          <label class="settings__item"
             >Победители Крест:
             <input type="number" formControlName="crossWinners"
           /></label>
-          <label
+          <label class="settings__item"
             >Победители Весь Билет:
             <input type="number" formControlName="allWinners"
           /></label>
@@ -99,6 +102,8 @@
         </fieldset>
       </div>
     </div>
+
+
   </div>
   <!-- <button type="button" (click)="addRound()">Добавить раунд</button> -->
 </form>
@@ -106,29 +111,29 @@
 <form [formGroup]="songForm">
   <div class="new-song">
     <div class="new-song__group">
-      <label>
+      <label class="settings__item">
         Русскоязычная:
         <mat-checkbox formControlName="rus"></mat-checkbox>
       </label>
     </div>
     <div class="new-song__group">
-      <label>
+      <label class="settings__item">
         Испольнитель:
         <input formControlName="artist" />
       </label>
-      <label>
+      <label class="settings__item">
         Название:
         <input formControlName="name" />
       </label>
     </div>
     <div class="new-song__group">
-      <label>
+      <label class="settings__item">
         youtubeId:
-        <input formControlName="youtubeId" />
+        <input class="youtube-id" formControlName="youtubeId" />
       </label>
-      <label>
+      <label class="settings__item">
         Старт:
-        <input type="number" formControlName="start" />
+        <input class="start-from" type="number" formControlName="start" />
       </label>
     </div>
     <button
@@ -220,14 +225,14 @@
     <ng-container matColumnDef="priority">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Приоритет</th>
       <td mat-cell *matCellDef="let song">
-        <mat-checkbox [(ngModel)]="song.priority"></mat-checkbox>
+        <mat-checkbox [(ngModel)]="song.priority" (change)="changePriority(song)"></mat-checkbox>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="disabled">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Исключить</th>
       <td mat-cell *matCellDef="let song">
-        <mat-checkbox [(ngModel)]="song.disabled"></mat-checkbox>
+        <mat-checkbox [(ngModel)]="song.disabled" (change)="changeDisabled(song)"></mat-checkbox>
       </td>
     </ng-container>
 
@@ -236,14 +241,18 @@
         Поместить в раунд
       </th>
       <td mat-cell *matCellDef="let song">
-        <input
-          [id]="song.id + 'round'"
-          type="number"
-          min="1"
-          max="2"
-          style="width: 4ch"
-          [(ngModel)]="song.round"
-        />
+        <div class="round-cell">
+          <input
+            [id]="song.id + 'round'"
+            type="number"
+            min="1"
+            max="2"
+            style="width: 4ch"
+            [(ngModel)]="song.round"
+            (change)="changeRound(song)"
+          />
+          <mat-icon *ngIf="song.round" (click)="dropSongRound(song)">close</mat-icon>
+        </div>
       </td>
     </ng-container>
 

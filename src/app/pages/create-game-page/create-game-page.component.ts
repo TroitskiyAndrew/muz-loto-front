@@ -287,6 +287,29 @@ export class CreateGamePageComponent implements OnDestroy {
     this.isBackGroundPlaying = false;
   }
 
+  changePriority(song: IDisplaySong){
+    if(song.priority){
+      song.disabled = false;
+      song.round = undefined
+    }
+  }
+  changeDisabled(song: IDisplaySong){
+    if(song.disabled){
+      song.priority = false;
+      song.round = undefined
+    }
+  }
+  changeRound(song: IDisplaySong){
+    if(song.round){
+      song.disabled = false;
+      song.priority = false;
+    }
+  }
+
+  dropSongRound(song: IDisplaySong){
+    song.round = undefined;
+  }
+
   ngOnDestroy(): void {
     this.stateService.showContacts = true;
   }
