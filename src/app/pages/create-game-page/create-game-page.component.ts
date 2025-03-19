@@ -4,10 +4,12 @@ import { SongsService } from '../../services/songs.service';
 import {
   IDisplaySong,
   IGame,
+  INewGame,
   IRoundSettings,
   ISong,
   ISongHistory,
   ISongWithParams,
+  IUsedSongs,
 } from '../../models/models';
 import { LoadingService } from '../../services/loading.service';
 import { MatSort } from '@angular/material/sort';
@@ -47,6 +49,9 @@ export class CreateGamePageComponent implements OnDestroy {
   form: FormGroup;
   songForm: FormGroup;
   isBackGroundPlaying = false;
+
+  scratchGame: INewGame | null = null;
+  usedSongsArr: IUsedSongs[] = [];
 
   constructor(
     private creatorService: CreatorService,
@@ -148,7 +153,9 @@ export class CreateGamePageComponent implements OnDestroy {
   }
 
   async init() {
+    this.loadingService.show()
     this.songs = ((await this.songsService.getSongs()) || []).map(this.mapSong);
+    this.loadingService.hide()
     this.dataSource = new MatTableDataSource<IDisplaySong>(this.songs);
     this.dataSource.sort = this.sort;
     this.dataSource.filterPredicate = (data: IDisplaySong, filter: string) => {
@@ -263,10 +270,7 @@ export class CreateGamePageComponent implements OnDestroy {
     const settings = { ...this.form.getRawValue(), testGame };
     this.loadingService.show();
     await this.creatorService
-      .generateGame(
-        this.songs.map((song) => ({ ...song, history: [] })),
-        settings
-      )
+      .createGame({game: this.scratchGame!, usedSongsArr: this.usedSongsArr, songsPreferences: this.songs})
       .then((game) =>
         this.creatorService.generateTickets(
           game,
@@ -276,6 +280,17 @@ export class CreateGamePageComponent implements OnDestroy {
       )
       .finally(() => this.loadingService.hide());
     this.router.navigate(['/']);
+  }
+  async generateGame(testGame = false) {
+    const settings = { ...this.form.getRawValue(), testGame };
+    const {game, usedSongsArr} = this.creatorService
+      .generateGame(
+        this.songs.map((song) => ({ ...song, history: [] })),
+        settings
+      );
+
+    this.scratchGame = game;
+    this.usedSongsArr = usedSongsArr;
   }
 
   playBackground() {

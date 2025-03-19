@@ -11,6 +11,7 @@ import {
   INewGame,
   IUsedSongs,
   IRound,
+  ISongPreferences,
 } from '../models/models';
 import { StateService } from './state.service';
 import {
@@ -30,10 +31,10 @@ export class CreatorService {
     private apiService: ApiService
   ) {}
 
-  public async generateGame(
+  public generateGame(
     songs: ISongWithParams[],
     settings: IGameSettings
-  ): Promise<IGame> {
+  ): {game: INewGame, usedSongsArr: IUsedSongs[]} {
     const { mandatorySongs, usualSongs } = songs.reduce(
       (result, song) => {
         if (song.disabled) {
@@ -139,9 +140,19 @@ export class CreatorService {
       ...newGame,
       results: getDefaultResults(newGame.rounds)
     }
+    return {game, usedSongsArr};
+  }
+  // ToDo Привести в порядок типизацию
+  public async  createGame({game, usedSongsArr, songsPreferences}: {
+    game: INewGame;
+    usedSongsArr: IUsedSongs[];
+    songsPreferences: ({
+      id: string;
+  } & ISongPreferences)[]
+}): Promise<IGame> {
     const createdGame = await this.apiService.createGame({
       game,
-      songsPreferences: songs.map(({ id, priority, disabled, round }) => ({
+      songsPreferences: songsPreferences.map(({ id, priority, disabled, round }) => ({
         id,
         priority,
         disabled,
@@ -153,6 +164,7 @@ export class CreatorService {
       throw new Error('Не смог создать игру');
     }
     return createdGame;
+
   }
 
   generateCode(): string {

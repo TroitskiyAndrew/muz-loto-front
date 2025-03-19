@@ -166,7 +166,7 @@ export class GameEngineService {
 
   getResultWeight(stepWinners: number[], gameWinners: number[], winnersSettings: IWinnersSettings): number | null {
     const winnersArray = Array.from(stepWinners);
-    const { count, tickets } = winnersSettings;
+    const { count } = winnersSettings;
     if (
       winnersArray.length > count ||
       winnersArray.some((winner) => gameWinners.includes(winner))
@@ -174,14 +174,13 @@ export class GameEngineService {
       return -this.boost * 10;
     }
 
-    if (
-      tickets &&
-      tickets.length &&
-      winnersArray.length === count &&
-      winnersArray.every((winner) => tickets.includes(winner))
-    ) {
-      return this.boost * 1000;
-    }
+    // if (
+    //   tickets.length &&
+    //   winnersArray.length === count &&
+    //   winnersArray.every((winner) => tickets.includes(winner))
+    // ) {
+    //   return this.boost * 1000;
+    // }
     if (winnersArray.length === count) {
       let result = this.boost--;
       if (this.boost === 501) {

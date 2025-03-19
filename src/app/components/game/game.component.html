@@ -1,20 +1,38 @@
-<div class="game" [ngClass]="stateService.showCards ? 'cards' : ''">
-  <ng-container *ngIf="!stateService.showCards">
-    <div *ngIf="!isGameStarted" class="game__start" (click)="startRound()">
-      <img src="assets/logo.png" alt="">
+<div *ngIf="game" class="game">
+  <div *ngIf="false" class="game__info">
+    <div class="game__main">
+      <div class="game__param">
+        <span class="game__param__label">Количество билетов:</span>
+        <span class="game__param__value">{{game.ticketsCount}}</span>
+      </div>
+      <div *ngIf="game.comment" class="game__param">
+        <span class="game__param__label">Комментарий:</span>
+        <span class="game__param__value">{{game.comment}}</span>
+      </div>
     </div>
-    <div *ngIf="isGameStarted" class="game__round" (click)="handleClick($event)"
-      (contextmenu)="rightClick($event)">
-      <div class="game__round__name"> {{currentRound.name}}</div>
-      <!-- <img src="assets/Финал.png" alt="" class="game__logo"> -->
-      <div class="game__round__field">
-        <app-field [round]="currentRound"></app-field>
+    <div class="game__background"></div>
+  </div>
+  <div class="game__rounds">
+    <div *ngFor="let round of game.rounds" class="game__rounds__item">
+      <div class="round__name">{{round.name}}</div>
+      <table mat-table [dataSource]="getDataSource(round)" class="mat-elevation-z8">
+        <!-- Колонка "Исполнитель" -->
+        <ng-container matColumnDef="artist">
+          <th mat-header-cell *matHeaderCellDef>Исполнитель</th>
+          <td mat-cell *matCellDef="let song">{{ song.artist }}</td>
+        </ng-container>
 
-      </div>
-      <div class="game__round__last-song">
-        <span *ngIf="showName"> {{ [selectedSong?.artist || '', selectedSong?.name || ''].join(' - ') }}</span>
-      </div>
+        <!-- Колонка "Название песни" -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Название</th>
+          <td mat-cell *matCellDef="let song">{{ song.name }}</td>
+        </ng-container>
+
+        <!-- Заголовок таблицы -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <!-- Строки с данными -->
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
     </div>
-  </ng-container>
+  </div>
 </div>
-<img *ngIf="game" class="logo" [src]="'assets/' + game.logo + '.png'" alt="">

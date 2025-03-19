@@ -5,21 +5,41 @@
     mat-raised-button
     type="submit"
     [disabled]="form.invalid"
-    (click)="createGame()"
+    (click)="generateGame()"
   >
-    Создать игру
+    Сгенерировать игру
   </button>
   <button
+    *ngIf="scratchGame"
+    class="create-button"
+    color="accent"
+    mat-raised-button
+    type="submit"
+    (click)="createGame()"
+  >
+    Сохранить игру
+  </button>
+  <button
+    *ngIf="scratchGame"
     class="create-button"
     color="primary"
     mat-raised-button
     type="submit"
-    [disabled]="form.invalid"
     (click)="createGame(true)"
   >
-    Создать тестовую игру
+    Сохранить игру как тестовую
   </button>
-  <div class="settings">
+  <button
+    *ngIf="scratchGame"
+    class="create-button"
+    color="warn"
+    mat-raised-button
+    type="submit"
+    (click)="scratchGame = null"
+  >
+    Вернуться к параметрам игры
+  </button>
+  <div *ngIf="!scratchGame" class="settings">
     <div class="settings__left">
       <fieldset class="settings__main">
         <legend>Основные</legend>
@@ -108,7 +128,7 @@
   <!-- <button type="button" (click)="addRound()">Добавить раунд</button> -->
 </form>
 
-<form [formGroup]="songForm">
+<form *ngIf="!scratchGame" [formGroup]="songForm">
   <div class="new-song">
     <div class="new-song__group">
       <label class="settings__item">
@@ -157,7 +177,7 @@
   <!-- <button type="button" (click)="addRound()">Добавить раунд</button> -->
 </form>
 
-<div class="songs">
+<div *ngIf="!scratchGame" class="songs">
   <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
     <ng-container matColumnDef="pending">
       <th mat-header-cell *matHeaderCellDef mat-sort-header [ngClass]="{ 'hidden': !stateService.user?.isAdmin }">Рассмотрение</th>
@@ -273,4 +293,6 @@
     ></tr>
   </table>
 </div>
+
+<app-game *ngIf="scratchGame" [game]="scratchGame"></app-game>
 

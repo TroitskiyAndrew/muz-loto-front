@@ -25,6 +25,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { GamesPageComponent } from './pages/games-page/games-page.component';
 import { RunPageComponent } from './pages/run-page/run-page.component';
 import { GamePageComponent } from './pages/game-page/game-page.component';
+import { GameComponent } from './components/game/game.component';
+import { CdkTableModule } from '@angular/cdk/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 @NgModule({
   declarations: [
@@ -39,6 +42,7 @@ import { GamePageComponent } from './pages/game-page/game-page.component';
     CreateGamePageComponent,
     GamesPageComponent,
     RunPageComponent,
+    GameComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
@@ -59,6 +63,8 @@ import { GamePageComponent } from './pages/game-page/game-page.component';
     MatSortModule,
     MatButtonModule,
     MatIconModule,
+    CdkTableModule,
+    MatPaginatorModule
   ],
   bootstrap: [AppComponent]
 })

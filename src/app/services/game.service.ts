@@ -432,9 +432,12 @@ export class GameService implements OnDestroy {
       this.isFirstStep = false;
       newLastStart = this.getLastStart();
     }
+    const now1 = Date.now();
     const selectedSongId = this.gameEngineService.selectSong(this.playingTickets, this.results.gameWinners, this.wantedWinner !== null ? this.playingRound[this.wantedWinner]! : null, this.availableSongsIds, this.playedSongs, this.wantedWinner);
+    console.log('selectSong', (Date.now() - now1)/1000);
+    const now2 = Date.now();
     const stepWinners = this.gameEngineService.getWinners(this.playingTickets, selectedSongId, this.playedSongs, this.wantedWinner);
-
+    console.log('getWinners', (Date.now() - now2)/1000)
     this.sendStartStepMessage({ stepWinners, selectedSongId, newLastStart });
     if (!this.simulation && !this.silentMode) {
       this.showRandomAndPlaySong();
