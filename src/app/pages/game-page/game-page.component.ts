@@ -66,8 +66,6 @@ export class GamePageComponent implements OnDestroy {
         this.router.navigate(['']);
         return;
       }
-
-      this.playerService.playBackGround(game.backgroundMusic);
       this.loadingService.hide();
     } else {
       const codeField = {

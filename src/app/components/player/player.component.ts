@@ -135,31 +135,36 @@ export class PlayerComponent implements OnDestroy {
         events: {
           onReady: () => {
             this.playerService.$initBackGround.next(true);
-            console.log('initBackGround')
+            console.log('initBackGround');
             this.sub = this.playerService.$playBackGround.subscribe(
               (backgroundMusic) => {
-                if(!backgroundMusic){
+                if (!backgroundMusic) {
                   return;
                 }
                 this.playerService.backgroundMusic = backgroundMusic;
-                this.backgroundPlayer.loadVideoById(backgroundMusic.youtubeId);
+                this.backgroundPlayer.cueVideoById(backgroundMusic.youtubeId);
                 this.backgroundPlayer.setVolume(0);
-                this.backgroundPlayer.seekTo(backgroundMusic.start, true);
-                this.increaseVolume(false, false);
-                this.backgroundPlayer.playVideo();
+                this.backgroundPlayer.addEventListener('onStateChange', (event: any) => {
+                  switch (event.data) {
+                    case 5:
+                      this.backgroundPlayer.seekTo(backgroundMusic.start, true);
+                      this.increaseVolume(false, false);
+                      this.backgroundPlayer.playVideo();
+                      break;
+                    case 0:
+                      this.backgroundPlayer.seekTo(
+                        this.playerService.backgroundMusic.start,
+                        true
+                      );
+                      break;
+                  }
+                });
+
               }
             );
             this.sub = this.playerService.$stopBackGround.subscribe(() => {
               this.decreaseVolume(false, false);
             });
-          },
-          onStateChange: (event: any) => {
-            if (event.data === 0) {
-              this.backgroundPlayer.seekTo(
-                this.playerService.backgroundMusic.start,
-                true
-              );
-            }
           },
         },
       }
@@ -172,7 +177,12 @@ export class PlayerComponent implements OnDestroy {
     (document.querySelector('app-player') as HTMLIFrameElement).style.zIndex =
       '100';
     const { youtubeId, start } = video;
-    this.player.loadVideoById(youtubeId);
+    this.player.cueVideoById(youtubeId);
+    this.player.addEventListener('onStateChange', (event: any) => {
+      if(event.data === 5) {
+        this.player.seekTo(start, true);
+      }
+    });
     this.player.playVideo();
     setTimeout(
       () => {

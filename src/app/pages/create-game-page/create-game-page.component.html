@@ -1,42 +1,22 @@
 <form [formGroup]="form">
-  <button
-    class="create-button"
-    color="accent"
-    mat-raised-button
-    type="submit"
-    [disabled]="form.invalid"
-    (click)="generateGame()"
-  >
+  <button *ngIf="!scratchGame" class="create-button" color="accent" mat-raised-button type="submit"
+    [disabled]="form.invalid" (click)="generateGame()">
     Сгенерировать игру
   </button>
-  <button
-    *ngIf="scratchGame"
-    class="create-button"
-    color="accent"
-    mat-raised-button
-    type="submit"
-    (click)="createGame()"
-  >
+  <button *ngIf="scratchGame" class="create-button" color="primary" mat-raised-button type="submit"
+    [disabled]="form.invalid" (click)="generateGame()">
+    Сгенерировать заново
+  </button>
+  <button *ngIf="scratchGame" class="create-button" color="accent" mat-raised-button type="submit"
+    (click)="createGame()">
     Сохранить игру
   </button>
-  <button
-    *ngIf="scratchGame"
-    class="create-button"
-    color="primary"
-    mat-raised-button
-    type="submit"
-    (click)="createGame(true)"
-  >
+  <button *ngIf="scratchGame" class="create-button" color="primary" mat-raised-button type="submit"
+    (click)="createGame(true)">
     Сохранить игру как тестовую
   </button>
-  <button
-    *ngIf="scratchGame"
-    class="create-button"
-    color="warn"
-    mat-raised-button
-    type="submit"
-    (click)="scratchGame = null"
-  >
+  <button *ngIf="scratchGame" class="create-button" color="warn" mat-raised-button type="submit"
+    (click)="scratchGame = null">
     Вернуться к параметрам игры
   </button>
   <div *ngIf="!scratchGame" class="settings">
@@ -62,29 +42,17 @@
           Старт (секунды):
           <input class="start-from" type="number" formControlName="start" />
         </label>
-        <button
-          *ngIf="!isBackGroundPlaying"
-          (click)="playBackground()"
-          mat-icon-button
-          [disabled]="form.controls['backgroundMusic'].invalid"
-        >
+        <button *ngIf="!isBackGroundPlaying" (click)="playBackground()" mat-icon-button
+          [disabled]="form.controls['backgroundMusic'].invalid">
           <mat-icon>play_arrow</mat-icon>
         </button>
-        <button
-          *ngIf="isBackGroundPlaying"
-          (click)="stopBackground()"
-          mat-icon-button
-        >
+        <button *ngIf="isBackGroundPlaying" (click)="stopBackground()" mat-icon-button>
           <mat-icon>pause</mat-icon>
         </button>
       </fieldset>
     </div>
     <div class="settings__rounds" formArrayName="rounds">
-      <div
-
-        *ngFor="let round of rounds.controls; let i = index"
-        [formGroup]="round"
-      >
+      <div *ngFor="let round of rounds.controls; let i = index" [formGroup]="round">
         <fieldset class="settings__rounds__item">
           <legend>Раунд {{ i + 1 }}</legend>
           <!-- <label class="settings__item"
@@ -102,22 +70,14 @@
             >Ряды билета:
             <input type="number" formControlName="ticketFieldRows"
           /></label> -->
-          <label class="settings__item"
-            >Иностранные песни:
-            <input type="number" formControlName="notRusSongs"
-          /></label>
-          <label class="settings__item"
-            >Победители Линия:
-            <input type="number" formControlName="lineWinners"
-          /></label>
-          <label class="settings__item"
-            >Победители Крест:
-            <input type="number" formControlName="crossWinners"
-          /></label>
-          <label class="settings__item"
-            >Победители Весь Билет:
-            <input type="number" formControlName="allWinners"
-          /></label>
+          <label class="settings__item">Иностранные песни:
+            <input type="number" formControlName="notRusSongs" /></label>
+          <label class="settings__item">Победители Линия:
+            <input type="number" formControlName="lineWinners" /></label>
+          <label class="settings__item">Победители Крест:
+            <input type="number" formControlName="crossWinners" /></label>
+          <label class="settings__item">Победители Весь Билет:
+            <input type="number" formControlName="allWinners" /></label>
           <!-- <button type="button" (click)="removeRound(i)">Удалить раунд</button> -->
         </fieldset>
       </div>
@@ -156,21 +116,12 @@
         <input class="start-from" type="number" formControlName="start" />
       </label>
     </div>
-    <button
-        (click)="playNewSong()"
-        [disabled]="songForm.controls['youtubeId'].invalid || songForm.controls['start'].invalid"
-        mat-icon-button
-      >
-        <mat-icon>play_arrow</mat-icon>
-      </button>
-    <button
-      class="create-button"
-      color="accent"
-      mat-raised-button
-      type="submit"
-      [disabled]="songForm.invalid"
-      (click)="createSong()"
-    >
+    <button (click)="playNewSong()"
+      [disabled]="songForm.controls['youtubeId'].invalid || songForm.controls['start'].invalid" mat-icon-button>
+      <mat-icon>play_arrow</mat-icon>
+    </button>
+    <button class="create-button" color="accent" mat-raised-button type="submit" [disabled]="songForm.invalid"
+      (click)="createSong()">
       Добавить песню
     </button>
   </div>
@@ -180,7 +131,8 @@
 <div *ngIf="!scratchGame" class="songs">
   <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
     <ng-container matColumnDef="pending">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header [ngClass]="{ 'hidden': !stateService.user?.isAdmin }">Рассмотрение</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header [ngClass]="{ 'hidden': !stateService.user?.isAdmin }">
+        Рассмотрение</th>
       <td mat-cell *matCellDef="let song" [ngClass]="{ 'hidden': !stateService.user?.isAdmin }">
         <button *ngIf="song.pending" (click)="acceptSong(song)" mat-icon-button>
           <mat-icon>check</mat-icon>
@@ -192,11 +144,7 @@
       <th mat-header-cell *matHeaderCellDef mat-sort-header>
         <div class="filter-header">
           Исполнитель
-          <input
-            type="text"
-            (click)="eventHandler($event)"
-            (input)="filterByArtist($event)"
-          />
+          <input type="text" (click)="eventHandler($event)" (input)="filterByArtist($event)" />
         </div>
       </th>
       <td mat-cell *matCellDef="let song">{{ song.artist }}</td>
@@ -206,11 +154,7 @@
       <th mat-header-cell *matHeaderCellDef mat-sort-header>
         <div class="filter-header">
           Название
-          <input
-            type="text"
-            (click)="eventHandler($event)"
-            (input)="filterByName($event)"
-          />
+          <input type="text" (click)="eventHandler($event)" (input)="filterByName($event)" />
         </div>
       </th>
       <td mat-cell *matCellDef="let song">{{ song.name }}</td>
@@ -232,11 +176,7 @@
       <th mat-header-cell *matHeaderCellDef mat-sort-header>
         <div class="filter-header">
           Последняя игра
-          <input
-            type="text"
-            (click)="eventHandler($event)"
-            (input)="filterByUsage($event)"
-          />
+          <input type="text" (click)="eventHandler($event)" (input)="filterByUsage($event)" />
         </div>
       </th>
       <td mat-cell *matCellDef="let song">{{ song.lastUsage }}</td>
@@ -262,15 +202,8 @@
       </th>
       <td mat-cell *matCellDef="let song">
         <div class="round-cell">
-          <input
-            [id]="song.id + 'round'"
-            type="number"
-            min="1"
-            max="2"
-            style="width: 4ch"
-            [(ngModel)]="song.round"
-            (change)="changeRound(song)"
-          />
+          <input [id]="song.id + 'round'" type="number" min="1" max="2" style="width: 4ch" [(ngModel)]="song.round"
+            (change)="changeRound(song)" />
           <mat-icon *ngIf="song.round" (click)="dropSongRound(song)">close</mat-icon>
         </div>
       </td>
@@ -286,13 +219,8 @@
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr
-      mat-row
-      *matRowDef="let row; columns: displayedColumns"
-      [ngClass]="{ pending: row.pending }"
-    ></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns" [ngClass]="{ pending: row.pending }"></tr>
   </table>
 </div>
 
 <app-game *ngIf="scratchGame" [game]="scratchGame"></app-game>
-
