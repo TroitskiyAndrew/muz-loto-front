@@ -60,7 +60,7 @@ export class GameComponent {
     const oldSong = round.field[row][col];
     this.wastedSongs.add(oldSong.id);
     const allAvailableSongs = this.songs.filter(song => {
-      return !song.disabled && !usedSongs.has(song.id) && !usedArtists.has(song.artist) && !this.wastedSongs.has(song.id)
+      return !song.disabled && !usedSongs.has(song.id) && (!usedArtists.has(song.artist) || song.artist === oldSong.artist) && !this.wastedSongs.has(song.id)
     });
     console.log(allAvailableSongs.map(song => song.name))
     if(allAvailableSongs.length === 0){
