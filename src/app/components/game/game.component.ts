@@ -11,6 +11,9 @@ import {
   Weight,
   Winner,
   INewGame,
+  ISongPreferences,
+  IDisplaySong,
+  ISongWithParams,
 } from '../../models/models';
 import { PlayerService } from '../../services/player.service';
 import { environment } from '../../../environments/environment';
@@ -27,13 +30,6 @@ import { LoadingService } from '../../services/loading.service';
 import { ApiService } from '../../services/api.service';
 import { MatTableDataSource } from '@angular/material/table';
 
-interface SongRow {
-  round1Artist: string;
-  round1Name: string;
-  round2Artist: string;
-  round2Name: string;
-}
-
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -41,8 +37,9 @@ interface SongRow {
 })
 export class GameComponent {
   @Input() game!: INewGame;
-  dataSource = new MatTableDataSource<SongRow>([]);
-  displayedColumns: string[] = ['artist', 'name'];
+  displayedColumns: string[] = ['song', 'play', 'change'];
+  @Input() songs: Omit<ISongWithParams, 'history'>[] = [];
+  wastedSongs = new Set<string>()
 
   constructor(private playerService: PlayerService) {}
 
@@ -52,6 +49,27 @@ export class GameComponent {
 
   playSong(song: IRoundSong){
     this.playerService.play(song);
+  }
+
+  changeSong(round: IRound, index: number){
+    const cols = round.field[0].length;
+    const row = Math.floor(index / cols);
+    const col = index % cols;
+    const usedSongs = new Set(this.game.rounds.map(round => round.field.flat()).flat().map(song => song.id));
+    const usedArtists = new Set(round.field.flat().map(song => song.artist))
+    const oldSong = round.field[row][col];
+    this.wastedSongs.add(oldSong.id);
+    const allAvailableSongs = this.songs.filter(song => {
+      return !song.disabled && !usedSongs.has(song.id) && !usedArtists.has(song.artist) && !this.wastedSongs.has(song.id)
+    });
+    console.log(allAvailableSongs.map(song => song.name))
+    if(allAvailableSongs.length === 0){
+      this.wastedSongs.clear();
+      this.changeSong(round, index);
+      return;
+    }
+    const randomSong = [...allAvailableSongs.filter(song => song.priority).sort(() => Math.random() - 0.5), ...allAvailableSongs.filter(song => !song.priority).sort(() => Math.random() - 0.5)][0];
+    return round.field[row][col] = {...randomSong, number: oldSong.number, played: false, class: ''};
   }
 
 }

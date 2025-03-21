@@ -16,16 +16,27 @@
     <div *ngFor="let round of game.rounds" class="game__rounds__item">
       <div class="round__name">{{round.name}}</div>
       <table mat-table [dataSource]="getDataSource(round)" class="mat-elevation-z8">
-        <!-- Колонка "Исполнитель" -->
-        <ng-container matColumnDef="artist">
-          <th mat-header-cell *matHeaderCellDef>Исполнитель</th>
-          <td mat-cell *matCellDef="let song">{{ song.artist }}</td>
+        <ng-container matColumnDef="song">
+          <th mat-header-cell *matHeaderCellDef>Песня</th>
+          <td mat-cell *matCellDef="let song">{{ song.artist + " - " + song.name}}</td>
         </ng-container>
 
-        <!-- Колонка "Название песни" -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Название</th>
-          <td mat-cell *matCellDef="let song">{{ song.name }}</td>
+        <ng-container matColumnDef="play">
+          <th mat-header-cell *matHeaderCellDef>Включить</th>
+          <td mat-cell *matCellDef="let song">
+            <button (click)="playSong(song)" mat-icon-button>
+              <mat-icon>play_arrow</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="change">
+          <th mat-header-cell *matHeaderCellDef>Заменить</th>
+          <td mat-cell *matCellDef="let song; let i = index">
+            <button (click)="changeSong(round, i)" mat-icon-button>
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </td>
         </ng-container>
 
         <!-- Заголовок таблицы -->

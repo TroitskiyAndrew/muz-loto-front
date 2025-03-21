@@ -185,7 +185,7 @@ export class CreateGamePageComponent implements OnDestroy {
           }`
         : '',
       usageCount: history.length,
-      pending: Boolean(song.owner)
+      pending: Boolean(song.owner),
     };
   }
 
