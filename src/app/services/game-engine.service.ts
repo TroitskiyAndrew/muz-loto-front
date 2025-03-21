@@ -13,7 +13,7 @@ export class GameEngineService {
   selectSong(roundTickets: IRoundTicket[], gameWinners: number[],
     winnersSettings: IWinnersSettings | null, availableSongsIds: string[], playedSongs: string[], wantedWinner: Winner | null): string {
     const step = playedSongs.length + 1;
-    const deep = BASE_DEEP + Math.floor(step / 10);
+    const deep = step < 35 ? 1 : 3;
     const weights = this.getWeights(roundTickets, gameWinners,
       winnersSettings, deep, availableSongsIds, playedSongs, wantedWinner);
     const selectedWeight = weights.sort((a, b) => b.weight - a.weight)[0];

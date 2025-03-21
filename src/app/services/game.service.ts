@@ -53,7 +53,6 @@ export class GameService implements OnDestroy {
   isSongPlaying = false;
   isDialogOpen = false;
 
-
   silentMode = environment.silentMode;
   simulation = environment.simulation;
   simulationAttempt = 1;
@@ -70,7 +69,7 @@ export class GameService implements OnDestroy {
     private gameEngineService: GameEngineService,
     private apiService: ApiService,
     private router: Router
-  ) { }
+  ) {}
 
   async init(params: IGameServiceInitParams): Promise<IGame | null> {
     this.isFront = params.isFront;
@@ -234,9 +233,11 @@ export class GameService implements OnDestroy {
     if (this.isFront && !this.showQuestionOnFront) {
       return;
     }
-    const message = `Билет${this.stepWinners.length > 1 ? 'ы' : ''
-      } #${this.stepWinners.join(', ')} собрал${this.stepWinners.length > 1 ? 'и' : ''
-      } ${WIN_NAMING[this.wantedWinner!]}. Билет в игре?`;
+    const message = `Билет${
+      this.stepWinners.length > 1 ? 'ы' : ''
+    } #${this.stepWinners.join(', ')} собрал${
+      this.stepWinners.length > 1 ? 'и' : ''
+    } ${WIN_NAMING[this.wantedWinner!]}. Билет в игре?`;
     this.dialogService
       .init({
         init: (dialogId) => (this.dialogId = dialogId!),
@@ -293,29 +294,33 @@ export class GameService implements OnDestroy {
     return {
       wantedWinner: this.getNextWantedWinner(this.wantedWinner!),
       newWinners: this.stepWinners,
-      wastedTickets: []
+      wastedTickets: [],
     };
   }
 
-  getNextWantedWinner(wantedWinner: Winner): Winner | null{
-    if(wantedWinner === Winner.Line){
-      return this.playingRound[Winner.Cross] ? Winner.Cross : this.getNextWantedWinner(Winner.Cross);
+  getNextWantedWinner(wantedWinner: Winner): Winner | null {
+    if (wantedWinner === Winner.Line) {
+      return this.playingRound[Winner.Cross]
+        ? Winner.Cross
+        : this.getNextWantedWinner(Winner.Cross);
     }
-    if(wantedWinner === Winner.Cross){
+    if (wantedWinner === Winner.Cross) {
       return this.playingRound[Winner.All] ? Winner.All : null;
     }
-    return null
+    return null;
   }
 
   submitWinnersChanges(results: ISubmitWinnersResults) {
-    const logWinner = results.wantedWinner ? results.wantedWinner - 1 : 2
+    const logWinner = results.wantedWinner ? results.wantedWinner - 1 : 2;
     console.log(
       `Билеты № ${results.newWinners} выиграли ${
-      // @ts-ignore
-      WIN_NAMING[logWinner]
+        // @ts-ignore
+        WIN_NAMING[logWinner]
       } в ${this.playingRound.name} на ${this.currentStep} ходу`
     );
-    this.playingTicketsNumbers = this.playingTicketsNumbers.filter(number => !results.wastedTickets.includes(number))
+    this.playingTicketsNumbers = this.playingTicketsNumbers.filter(
+      (number) => !results.wastedTickets.includes(number)
+    );
     this.results.gameWinners.push(...results.newWinners);
     this.stepWinners = [];
     this.wantedWinner = results.wantedWinner;
@@ -419,7 +424,10 @@ export class GameService implements OnDestroy {
     if (this.blockStartStep) {
       return;
     }
-    if (this.results.rounds[this.results.currentRoundIndex].playedSongs.length === this.roundSongs.length) {
+    if (
+      this.results.rounds[this.results.currentRoundIndex].playedSongs.length ===
+      this.roundSongs.length
+    ) {
       this.sendStopRoundMessage(true);
       if (this.simulation && this.playingRound) {
         this.sendStartRoundMessage();
@@ -432,12 +440,21 @@ export class GameService implements OnDestroy {
       this.isFirstStep = false;
       newLastStart = this.getLastStart();
     }
-    const now1 = Date.now();
-    const selectedSongId = this.gameEngineService.selectSong(this.playingTickets, this.results.gameWinners, this.wantedWinner !== null ? this.playingRound[this.wantedWinner]! : null, this.availableSongsIds, this.playedSongs, this.wantedWinner);
-    // console.log('selectSong', (Date.now() - now1)/1000);
-    const now2 = Date.now();
-    const stepWinners = this.gameEngineService.getWinners(this.playingTickets, selectedSongId, this.playedSongs, this.wantedWinner);
-    // console.log('getWinners', (Date.now() - now2)/1000)
+    const selectedSongId = this.gameEngineService.selectSong(
+      [...this.playingTickets],
+      [...this.results.gameWinners],
+      this.wantedWinner !== null ? this.playingRound[this.wantedWinner]! : null,
+      [...this.availableSongsIds],
+      [...this.playedSongs],
+      this.wantedWinner
+    );
+    const stepWinners = this.gameEngineService.getWinners(
+      this.playingTickets,
+      selectedSongId,
+      this.playedSongs,
+      this.wantedWinner
+    );
+
     this.sendStartStepMessage({ stepWinners, selectedSongId, newLastStart });
     if (!this.simulation && !this.silentMode) {
       this.showRandomAndPlaySong();
@@ -450,7 +467,7 @@ export class GameService implements OnDestroy {
 
   showRandomAndPlaySong() {
     const randomAvailableSongs: string[] = [];
-    const availableSongsIds = [...this.availableSongsIds, this.selectedSongId]
+    const availableSongsIds = [...this.availableSongsIds, this.selectedSongId];
     while (
       randomAvailableSongs.length <
       DELAY_BEFORE_PLAYING / RANDOMIZER_DURATION_STEP
@@ -460,7 +477,7 @@ export class GameService implements OnDestroy {
       );
     }
     this.socketService.playSong(this.selectedSongId, randomAvailableSongs);
-    this.sendBlockStopStepMessage(true)
+    this.sendBlockStopStepMessage(true);
   }
 
   sendBlockStopStepMessage(block: boolean) {
@@ -497,14 +514,17 @@ export class GameService implements OnDestroy {
         this.sendWinnerAnswerMessage([]);
       }
     }
-    if (this.results.rounds[this.results.currentRoundIndex].playedSongs.length === this.roundSongs.length) {
+    if (
+      this.results.rounds[this.results.currentRoundIndex].playedSongs.length ===
+      this.roundSongs.length
+    ) {
       this.sendStopRoundMessage(true);
       if (this.simulation) {
         if (this.playingRound) {
           this.sendStartRoundMessage();
           this.makeStep();
         } else if (this.simulationAttempt <= this.simulationCount) {
-          console.log(this.simulationAttempt)
+          console.log(this.simulationAttempt);
           this.simulationAttempt++;
           this.game.results = getDefaultResults(this.game.rounds);
           this.sendStartRoundMessage();
@@ -521,8 +541,6 @@ export class GameService implements OnDestroy {
   sendNewPlayingTicketsMessage(newPlayingTickets: number[]) {
     this.socketService.changePlayingTickets(newPlayingTickets);
     this.newPlayingTicketsChanges(newPlayingTickets);
-
-
   }
 
   newPlayingTicketsChanges(newPlayingTickets: number[]) {
@@ -533,12 +551,12 @@ export class GameService implements OnDestroy {
     return add
       ? Array.from(new Set([...this.playingTicketsNumbers, ...tickets]))
       : this.playingTicketsNumbers.filter(
-        (ticket) => !tickets.includes(ticket)
-      );
+          (ticket) => !tickets.includes(ticket)
+        );
   }
 
   changePlayingTickets(tickets: number[], add: boolean) {
-    const newPlayingTickets = this.getNewPlayingTickets(tickets, add)
+    const newPlayingTickets = this.getNewPlayingTickets(tickets, add);
     this.sendNewPlayingTicketsMessage(newPlayingTickets);
     this.saveResults();
   }
@@ -558,14 +576,16 @@ export class GameService implements OnDestroy {
   }
 
   get playingTickets() {
-    return this.tickets.filter(({ number }) =>
-      this.results.playingTicketsNumbers.includes(number)
-    ).map((ticket) => {
-      return {
-        number: ticket.number,
-        field: ticket.rounds[this.results.currentRoundIndex].field,
-      };
-    });
+    return this.tickets
+      .filter(({ number }) =>
+        this.results.playingTicketsNumbers.includes(number)
+      )
+      .map((ticket) => {
+        return {
+          number: ticket.number,
+          field: ticket.rounds[this.results.currentRoundIndex].field,
+        };
+      });
   }
 
   get playedSongs() {
@@ -598,7 +618,8 @@ export class GameService implements OnDestroy {
   }
 
   set wantedWinner(wantedWinner: Winner | null) {
-    this.results.rounds[this.results.currentRoundIndex].wantedWinner = wantedWinner;
+    this.results.rounds[this.results.currentRoundIndex].wantedWinner =
+      wantedWinner;
   }
 
   get stepWinners() {
@@ -610,14 +631,19 @@ export class GameService implements OnDestroy {
     this.results.stepWinners.push(...winners);
   }
 
-  get currentStep(){
-    return this.results.rounds[this.results.currentRoundIndex].playedSongs.length + 1;
+  get currentStep() {
+    return (
+      this.results.rounds[this.results.currentRoundIndex].playedSongs.length + 1
+    );
   }
 
   getLastStart() {
     const now = new Date();
-    return `${this.addZero(now.getDate())}/${this.addZero(now.getMonth() + 1)
-      }/${now.getFullYear()} ${this.addZero(now.getHours())}:${this.addZero(now.getMinutes())}`;
+    return `${this.addZero(now.getDate())}/${this.addZero(
+      now.getMonth() + 1
+    )}/${now.getFullYear()} ${this.addZero(now.getHours())}:${this.addZero(
+      now.getMinutes()
+    )}`;
   }
 
   private addZero(number: number): string {
@@ -625,7 +651,10 @@ export class GameService implements OnDestroy {
   }
 
   isRoundFinished(game: IGame, roundIndex: number) {
-    return game.results.rounds[roundIndex].playedSongs.length === game.rounds[roundIndex].field.flat().length;
+    return (
+      game.results.rounds[roundIndex].playedSongs.length ===
+      game.rounds[roundIndex].field.flat().length
+    );
   }
 
   isGameFinished(game: IGame) {
