@@ -38,7 +38,7 @@ import { MatTableDataSource } from '@angular/material/table';
 export class GameComponent {
   @Input() game!: INewGame;
   displayedColumns: string[] = ['song', 'play', 'change'];
-  @Input() songs: Omit<ISongWithParams, 'history'>[] = [];
+  @Input() songs: ISongWithParams[] = [];
   wastedSongs = new Set<string>()
 
   constructor(private playerService: PlayerService) {}
@@ -62,7 +62,6 @@ export class GameComponent {
     const allAvailableSongs = this.songs.filter(song => {
       return !song.disabled && !usedSongs.has(song.id) && (!usedArtists.has(song.artist) || song.artist === oldSong.artist) && !this.wastedSongs.has(song.id)
     });
-    console.log(allAvailableSongs.map(song => song.name))
     if(allAvailableSongs.length === 0){
       this.wastedSongs.clear();
       this.changeSong(round, index);

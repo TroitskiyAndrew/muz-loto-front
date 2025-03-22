@@ -50,7 +50,7 @@ export type ISongWithParams = ISong &
     history: ISongHistory[];
   };
 
-export type IDisplaySong = Omit<ISongWithParams, 'history'> & {
+export type IDisplaySong = ISongWithParams & {
   lastUsage: string;
   usageCount: number;
   pending: boolean;

@@ -51,7 +51,7 @@ export class CreateGamePageComponent implements OnDestroy {
   isBackGroundPlaying = false;
 
   scratchGame: INewGame | null = null;
-  usedSongsArr: IUsedSongs[] = [];
+  usedSongs: IUsedSongs[] = [];
 
   constructor(
     private creatorService: CreatorService,
@@ -175,10 +175,10 @@ export class CreateGamePageComponent implements OnDestroy {
   }
 
   mapSong(song: ISongWithParams): IDisplaySong {
-    const { history, ...rest } = song;
+    const { history } = song;
     const lastUsage = history[history.length - 1];
     return {
-      ...rest,
+      ...song,
       lastUsage: lastUsage
         ? `${lastUsage.code}/${lastUsage.round} ${
             lastUsage.lastStart.split(' ')[0]
@@ -271,7 +271,7 @@ export class CreateGamePageComponent implements OnDestroy {
     this.scratchGame!.testGame = testGame;
     this.loadingService.show();
     await this.creatorService
-      .createGame({game: this.scratchGame!, usedSongsArr: this.usedSongsArr, songsPreferences: this.songs})
+      .createGame({game: this.scratchGame!, usedSongs: this.usedSongs, songsPreferences: this.songs})
       .then((game) =>
         this.creatorService.generateTickets(
           game,
@@ -285,14 +285,14 @@ export class CreateGamePageComponent implements OnDestroy {
 
   async generateGame(testGame = false) {
     const settings = { ...this.form.getRawValue(), testGame };
-    const {game, usedSongsArr} = this.creatorService
+    const {game, usedSongs} = this.creatorService
       .generateGame(
         this.songs.map((song) => ({ ...song, history: [] })),
         settings
       );
 
     this.scratchGame = game;
-    this.usedSongsArr = usedSongsArr;
+    this.usedSongs = usedSongs;
   }
 
   playBackground() {
